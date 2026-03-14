@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      travel_history: {
+        Row: {
+          accommodation: string | null
+          budget: number
+          country: string
+          created_at: string
+          entertainment: string[]
+          food: string[]
+          group_type: string
+          id: string
+          people: number
+          state: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accommodation?: string | null
+          budget: number
+          country: string
+          created_at?: string
+          entertainment?: string[]
+          food?: string[]
+          group_type?: string
+          id?: string
+          people?: number
+          state: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accommodation?: string | null
+          budget?: number
+          country?: string
+          created_at?: string
+          entertainment?: string[]
+          food?: string[]
+          group_type?: string
+          id?: string
+          people?: number
+          state?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
