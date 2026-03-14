@@ -31,7 +31,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       entertainment: data.entertainment,
       food: data.food,
       accommodation: data.accommodation,
-    } as any);
+    });
     setSaving(false);
     if (error) {
       toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
