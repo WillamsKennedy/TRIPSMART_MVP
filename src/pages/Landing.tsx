@@ -5,12 +5,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Plane, MapPin, Sun, Compass, TrendingUp, Calendar, Star, ArrowRight, LogOut, History } from 'lucide-react';
 
 const featuredDestinations = [
-  { name: 'Santorini', country: 'Grécia', image: '🏛️', tag: 'Popular', color: 'from-blue-400 to-cyan-300' },
-  { name: 'Bali', country: 'Indonésia', image: '🌴', tag: 'Tendência', color: 'from-green-400 to-emerald-300' },
-  { name: 'Machu Picchu', country: 'Peru', image: '🏔️', tag: 'Aventura', color: 'from-amber-400 to-yellow-300' },
-  { name: 'Maldivas', country: 'Maldivas', image: '🏝️', tag: 'Romântico', color: 'from-cyan-400 to-blue-300' },
-  { name: 'Tóquio', country: 'Japão', image: '🗼', tag: 'Cultura', color: 'from-pink-400 to-rose-300' },
-  { name: 'Capadócia', country: 'Turquia', image: '🎈', tag: 'Único', color: 'from-orange-400 to-red-300' },
+  { name: 'Santorini', country: 'Grécia', countryId: 'GR', image: '🏛️', tag: 'Popular', color: 'from-blue-400 to-cyan-300' },
+  { name: 'Bali', country: 'Indonésia', countryId: 'ID', image: '🌴', tag: 'Tendência', color: 'from-green-400 to-emerald-300' },
+  { name: 'Machu Picchu', country: 'Peru', countryId: 'PE', image: '🏔️', tag: 'Aventura', color: 'from-amber-400 to-yellow-300' },
+  { name: 'Rio de Janeiro', country: 'Brasil', countryId: 'BR', image: '🏖️', tag: 'Clássico', color: 'from-cyan-400 to-blue-300' },
+  { name: 'Tóquio', country: 'Japão', countryId: 'JP', image: '🗼', tag: 'Cultura', color: 'from-pink-400 to-rose-300' },
+  { name: 'Capadócia', country: 'Turquia', countryId: 'TR', image: '🎈', tag: 'Único', color: 'from-orange-400 to-red-300' },
 ];
 
 const travelTips = [
@@ -20,17 +20,25 @@ const travelTips = [
 ];
 
 const touristSpots = [
-  { name: 'Cristo Redentor', location: 'Rio de Janeiro, Brasil', emoji: '🇧🇷', demand: 'Alta' },
-  { name: 'Torre Eiffel', location: 'Paris, França', emoji: '🇫🇷', demand: 'Alta' },
-  { name: 'Grande Muralha', location: 'Pequim, China', emoji: '🇨🇳', demand: 'Moderada' },
-  { name: 'Coliseu', location: 'Roma, Itália', emoji: '🇮🇹', demand: 'Alta' },
-  { name: 'Taj Mahal', location: 'Agra, Índia', emoji: '🇮🇳', demand: 'Moderada' },
-  { name: 'Chichén Itzá', location: 'Yucatán, México', emoji: '🇲🇽', demand: 'Baixa' },
+  { name: 'Cristo Redentor', location: 'Rio de Janeiro, Brasil', emoji: '🇧🇷', demand: 'Alta', countryId: 'BR' },
+  { name: 'Torre Eiffel', location: 'Paris, França', emoji: '🇫🇷', demand: 'Alta', countryId: 'FR' },
+  { name: 'Grande Muralha', location: 'Pequim, China', emoji: '🇨🇳', demand: 'Moderada', countryId: 'CN' },
+  { name: 'Coliseu', location: 'Roma, Itália', emoji: '🇮🇹', demand: 'Alta', countryId: 'IT' },
+  { name: 'Taj Mahal', location: 'Agra, Índia', emoji: '🇮🇳', demand: 'Moderada', countryId: 'IN' },
+  { name: 'Chichén Itzá', location: 'Yucatán, México', emoji: '🇲🇽', demand: 'Baixa', countryId: 'MX' },
 ];
 
 const Landing = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+
+  const goToPlanner = (countryId?: string) => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    navigate(countryId ? `/planejar?country=${countryId}` : '/planejar');
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,7 +60,7 @@ const Landing = () => {
                 <Button variant="ghost" size="sm" onClick={signOut} className="gap-2">
                   <LogOut size={16} /> Sair
                 </Button>
-                <Button onClick={() => navigate('/planejar')} className="gradient-tropical border-0 rounded-full px-6 font-bold gap-2">
+                <Button onClick={() => goToPlanner()} className="gradient-tropical border-0 rounded-full px-6 font-bold gap-2">
                   <Compass size={16} /> Planejar viagem
                 </Button>
               </>
@@ -85,11 +93,11 @@ const Landing = () => {
             <span className="gradient-text">começa aqui</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mt-6 max-w-2xl mx-auto">
-            Descubra destinos incríveis, planeje dentro do seu orçamento e crie memórias inesquecíveis. 
+            Descubra destinos incríveis, planeje dentro do seu orçamento e crie memórias inesquecíveis.
           </p>
           <div className="flex flex-wrap justify-center gap-4 mt-8">
             <Button
-              onClick={() => navigate(user ? '/planejar' : '/auth')}
+              onClick={() => goToPlanner()}
               className="gradient-tropical border-0 rounded-full px-8 h-14 text-lg font-bold gap-2 shadow-lg"
             >
               <Compass size={20} /> Começar a planejar
@@ -98,7 +106,7 @@ const Landing = () => {
         </motion.div>
       </section>
 
-      {/* Featured Destinations */}
+      {/* Featured Destinations - INTERACTIVE */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
@@ -107,12 +115,15 @@ const Landing = () => {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {featuredDestinations.map((dest, i) => (
-              <motion.div
+              <motion.button
                 key={dest.name}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08, duration: 0.5 }}
-                className="group relative rounded-2xl overflow-hidden border border-border bg-card cursor-pointer hover:shadow-xl transition-all"
+                whileHover={{ y: -8, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => goToPlanner(dest.countryId)}
+                className="group relative rounded-2xl overflow-hidden border border-border bg-card cursor-pointer hover:shadow-xl transition-all text-left"
                 style={{ boxShadow: 'var(--card-shadow)' }}
               >
                 <div className={`h-32 md:h-40 bg-gradient-to-br ${dest.color} flex items-center justify-center text-5xl md:text-6xl`}>
@@ -123,13 +134,18 @@ const Landing = () => {
                   <h3 className="text-lg font-bold text-card-foreground mt-1">{dest.name}</h3>
                   <p className="text-sm text-muted-foreground">{dest.country}</p>
                 </div>
-              </motion.div>
+                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="text-xs font-bold px-3 py-1 rounded-full gradient-tropical text-primary-foreground">
+                    Planejar →
+                  </span>
+                </div>
+              </motion.button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Tourist Spots */}
+      {/* Tourist Spots - INTERACTIVE */}
       <section className="py-16 px-4 bg-card/50">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
@@ -138,12 +154,15 @@ const Landing = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {touristSpots.map((spot, i) => (
-              <motion.div
+              <motion.button
                 key={spot.name}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.06, duration: 0.5 }}
-                className="flex items-center gap-4 p-4 rounded-2xl border border-border bg-card"
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => goToPlanner(spot.countryId)}
+                className="flex items-center gap-4 p-4 rounded-2xl border border-border bg-card text-left hover:border-primary/40 transition-all"
                 style={{ boxShadow: 'var(--card-shadow)' }}
               >
                 <span className="text-3xl">{spot.emoji}</span>
@@ -158,7 +177,7 @@ const Landing = () => {
                 }`}>
                   {spot.demand}
                 </span>
-              </motion.div>
+              </motion.button>
             ))}
           </div>
         </div>

@@ -24,8 +24,13 @@ export type Database = {
           food: string[]
           group_type: string
           id: string
+          local_transport: string | null
+          month: number | null
           people: number
+          restaurants: Json | null
           state: string
+          tourist_spots: Json | null
+          transport_to_destination: string | null
           updated_at: string
           user_id: string
         }
@@ -38,8 +43,13 @@ export type Database = {
           food?: string[]
           group_type?: string
           id?: string
+          local_transport?: string | null
+          month?: number | null
           people?: number
+          restaurants?: Json | null
           state: string
+          tourist_spots?: Json | null
+          transport_to_destination?: string | null
           updated_at?: string
           user_id: string
         }
@@ -52,8 +62,13 @@ export type Database = {
           food?: string[]
           group_type?: string
           id?: string
+          local_transport?: string | null
+          month?: number | null
           people?: number
+          restaurants?: Json | null
           state?: string
+          tourist_spots?: Json | null
+          transport_to_destination?: string | null
           updated_at?: string
           user_id?: string
         }
