@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, RotateCcw, Save, Map, ExternalLink } from "lucide-react";
+import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import TravelMap from "@/components/TravelMap";
-import { monthNames, transportOptions, localTransportOptions } from "@/data/mockData";
+import { monthNames, transportOptions, localTransportOptions, restaurantsByState } from "@/data/mockData";
 import type { TravelState } from "@/types/travel";
 
 interface StepSummaryProps {
@@ -23,6 +23,9 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const transportLabel = transportOptions.find(t => t.id === data.transportToDestination)?.label || data.transportToDestination;
   const localTransportLabel = localTransportOptions.find(t => t.id === data.localTransport)?.label || data.localTransport;
 
+  // Get all restaurants for the state to show on map
+  const stateRestaurants = restaurantsByState[data.state] || [];
+
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
@@ -31,16 +34,16 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       budget: data.budget,
       people: data.people,
       group_type: data.groupType,
-      country: data.countryName || data.country,
+      country: 'Brasil',
       state: data.stateName || data.state,
       entertainment: data.selectedSpots.map(s => s.name),
-      food: data.selectedRestaurants.map(r => r.name),
+      food: [],
       accommodation: data.accommodation?.name || null,
       month: data.month,
       transport_to_destination: data.transportToDestination,
       tourist_spots: data.selectedSpots as any,
       local_transport: data.localTransport,
-      restaurants: data.selectedRestaurants as any,
+      restaurants: stateRestaurants as any,
     });
     setSaving(false);
     if (error) {
@@ -51,12 +54,11 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     }
   };
 
-  // Generate Google Maps directions URL
   const generateMapsUrl = () => {
     const points: string[] = [];
     if (data.accommodation) points.push(`${data.accommodation.lat},${data.accommodation.lng}`);
     data.selectedSpots.forEach(s => points.push(`${s.lat},${s.lng}`));
-    data.selectedRestaurants.forEach(r => points.push(`${r.lat},${r.lng}`));
+    stateRestaurants.forEach(r => points.push(`${r.lat},${r.lng}`));
     if (points.length < 2) return '#';
     const origin = points[0];
     const dest = points[points.length - 1];
@@ -81,32 +83,31 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           Roteiro pronto! 🎉
         </h2>
         <p className="text-muted-foreground text-lg">
-          Veja seu planejamento completo abaixo
+          {data.days} dia{data.days > 1 ? 's' : ''} em {data.stateName}
         </p>
       </div>
 
       {/* Summary Card */}
       <div className="w-full p-6 rounded-2xl border border-border bg-card space-y-4" style={{ boxShadow: 'var(--card-shadow)' }}>
-        <SummaryRow label="Orçamento" value={`R$ ${data.budget.toLocaleString("pt-BR")}`} />
+        <SummaryRow label="Orçamento" value={data.budgetLabel} />
         <SummaryRow label="Passageiros" value={`${data.people} pessoa${data.people > 1 ? 's' : ''}`} />
+        <SummaryRow label="Duração" value={`${data.days} dia${data.days > 1 ? 's' : ''}`} />
         {data.people > 1 && <SummaryRow label="Tipo" value={data.groupType === 'couple' ? 'Casal' : 'Amigos'} />}
         {data.month && <SummaryRow label="Mês" value={monthNames[data.month - 1]} />}
         {data.transportToDestination && <SummaryRow label="Transporte ida" value={transportLabel || ''} />}
-        <SummaryRow label="Destino" value={`${data.stateName || data.state}, ${data.countryName || data.country}`} />
+        <SummaryRow label="Destino" value={`${data.stateName}, Brasil`} />
         
         {data.selectedSpots.length > 0 && (
-          <>
-            <div className="pt-2 border-t border-border">
-              <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Pontos Turísticos</span>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {data.selectedSpots.map(s => (
-                  <span key={s.id} className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary">
-                    {s.imageEmoji} {s.name}
-                  </span>
-                ))}
-              </div>
+          <div className="pt-2 border-t border-border">
+            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Pontos Turísticos</span>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {data.selectedSpots.map(s => (
+                <span key={s.id} className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary">
+                  {s.imageEmoji} {s.name}
+                </span>
+              ))}
             </div>
-          </>
+          </div>
         )}
 
         {data.accommodation && (
@@ -115,26 +116,15 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
             <div className="mt-1">
               <span className="font-bold text-foreground">{data.accommodation.name}</span>
               <span className="text-sm text-muted-foreground block">{data.accommodation.address}</span>
-              <span className="text-sm text-primary font-semibold">⭐ {data.accommodation.rating} · R$ {data.accommodation.pricePerNight}/noite</span>
+              <span className="text-sm text-primary font-semibold">
+                ⭐ {data.accommodation.rating} · R$ {data.accommodation.pricePerNight}/noite · 
+                Total: R$ {(data.accommodation.pricePerNight * data.days).toLocaleString('pt-BR')}
+              </span>
             </div>
           </div>
         )}
 
         {data.localTransport && <SummaryRow label="Transporte local" value={localTransportLabel || ''} />}
-
-        {data.selectedRestaurants.length > 0 && (
-          <div className="pt-2 border-t border-border">
-            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Restaurantes</span>
-            <div className="space-y-1 mt-2">
-              {data.selectedRestaurants.map(r => (
-                <div key={r.id} className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-foreground">{r.name}</span>
-                  <span className="text-muted-foreground">{r.cuisine} · {r.priceRange}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Map */}
@@ -146,9 +136,9 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         <TravelMap
           spots={data.selectedSpots}
           accommodation={data.accommodation}
-          restaurants={data.selectedRestaurants}
+          restaurants={stateRestaurants}
         />
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: '#FF6B35' }} /> Hospedagem</span>
           <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: '#00B4D8' }} /> Pontos Turísticos</span>
           <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: '#E91E63' }} /> Restaurantes</span>
@@ -165,13 +155,20 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         <ExternalLink size={16} /> Abrir roteiro no Google Maps
       </a>
 
-      {/* N8N Routes placeholder */}
-      <div className="w-full p-4 rounded-2xl border border-dashed border-primary/40 bg-primary/5 text-center">
+      {/* N8N Itinerary placeholder */}
+      <div className="w-full p-5 rounded-2xl border border-dashed border-primary/40 bg-primary/5">
+        <div className="flex items-center gap-2 mb-3">
+          <CalendarDays size={20} className="text-primary" />
+          <span className="font-bold text-foreground">Roteiro dia a dia</span>
+        </div>
         <p className="text-sm text-primary font-semibold">
-          🤖 Recomendações de rotas e trajetos serão geradas automaticamente via n8n
+          🤖 O roteiro diário será gerado pela IA via n8n com base nos seus {data.days} dias de viagem
         </p>
         <p className="text-xs text-muted-foreground mt-1">
-          Integração pendente · Webhook será chamado com os dados do roteiro
+          Incluirá: o que fazer a cada dia e hora, rotas otimizadas e sugestões personalizadas
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Configure o n8n para ativar este recurso · Webhook: <code className="text-primary">generate-itinerary</code>
         </p>
       </div>
 

@@ -15,7 +15,6 @@ serve(async (req) => {
     const N8N_WEBHOOK_BASE_URL = Deno.env.get('N8N_WEBHOOK_BASE_URL');
 
     if (!N8N_WEBHOOK_BASE_URL) {
-      // Return mock response when n8n is not configured
       return new Response(
         JSON.stringify({
           success: true,
@@ -27,14 +26,12 @@ serve(async (req) => {
       );
     }
 
-    // Route to appropriate n8n webhook based on action
     const webhookUrls: Record<string, string> = {
-      'get-states': `${N8N_WEBHOOK_BASE_URL}/get-states`,
       'get-tourist-spots': `${N8N_WEBHOOK_BASE_URL}/get-tourist-spots`,
       'get-accommodations': `${N8N_WEBHOOK_BASE_URL}/get-accommodations`,
       'get-restaurants': `${N8N_WEBHOOK_BASE_URL}/get-restaurants`,
-      'get-routes': `${N8N_WEBHOOK_BASE_URL}/get-routes`,
       'get-transport-prices': `${N8N_WEBHOOK_BASE_URL}/get-transport-prices`,
+      'generate-itinerary': `${N8N_WEBHOOK_BASE_URL}/generate-itinerary`,
     };
 
     const webhookUrl = webhookUrls[action];

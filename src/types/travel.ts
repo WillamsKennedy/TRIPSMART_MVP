@@ -7,6 +7,8 @@ export interface TouristSpot {
   lat: number;
   lng: number;
   imageEmoji: string;
+  imageUrl?: string;
+  avgCostPerPerson?: number;
 }
 
 export interface AccommodationDetail {
@@ -35,40 +37,31 @@ export interface RestaurantDetail {
 
 export interface TravelState {
   budget: number;
+  budgetLabel: string;
   people: number;
+  days: number;
   groupType: 'solo' | 'couple' | 'friends';
   month: number | null;
   transportToDestination: string | null;
-  country: string;
-  countryName: string;
   state: string;
   stateName: string;
   selectedSpots: TouristSpot[];
   accommodation: AccommodationDetail | null;
   localTransport: string | null;
-  selectedRestaurants: RestaurantDetail[];
 }
 
 export interface StateData {
   id: string;
   name: string;
-  country: string;
+  region: string;
   demand: 'high' | 'moderate' | 'low';
   demandLabel: string;
   description: string;
+  imageEmoji: string;
 }
 
-// Legacy types kept for compatibility
-export interface StateRecommendation {
-  id: string;
-  name: string;
-  country: string;
-  seasonLabel: string;
-  seasonType: 'high' | 'low' | 'moderate';
-  description: string;
-  avgCostPerPerson: number;
+export interface ItineraryDay {
+  day: number;
+  title: string;
+  activities: { time: string; description: string; location?: string }[];
 }
-
-export interface EntertainmentOption { id: string; label: string; icon: string; }
-export interface FoodOption { id: string; label: string; icon: string; }
-export interface AccommodationOption { id: string; name: string; type: string; pricePerNight: number; budgetMatch: number; location: string; description: string; }
