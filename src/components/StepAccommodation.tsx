@@ -7,12 +7,18 @@ import type { AccommodationDetail, TouristSpot } from "@/types/travel";
 
 interface StepAccommodationProps {
   cityId: string;
+  cityName: string;
   selectedSpots: TouristSpot[];
   budget: number;
+  budgetLabel: string;
+  people: number;
+  days: number;
+  month: number | null;
+  transportToDestination: string | null;
   onNext: (accommodation: AccommodationDetail) => void;
 }
 
-const StepAccommodation = ({ cityId, selectedSpots, budget, onNext }: StepAccommodationProps) => {
+const StepAccommodation = ({ cityId, cityName, selectedSpots, budget, budgetLabel, people, days, month, transportToDestination, onNext }: StepAccommodationProps) => {
   const { toast } = useToast();
   const [accommodations, setAccommodations] = useState<AccommodationDetail[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,8 +35,14 @@ const StepAccommodation = ({ cityId, selectedSpots, budget, onNext }: StepAccomm
           action: 'get-accommodations',
           params: {
             city: cityId,
+            cityName,
             budget,
-            spots: selectedSpots.map(s => ({ name: s.name, lat: s.lat, lng: s.lng })),
+            budgetLabel,
+            people,
+            days,
+            month,
+            transportToDestination,
+            spots: selectedSpots.map(s => ({ name: s.name, lat: s.lat, lng: s.lng, category: s.category })),
           },
         },
       });
