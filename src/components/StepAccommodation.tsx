@@ -35,8 +35,14 @@ const StepAccommodation = ({ cityId, cityName, selectedSpots, budget, budgetLabe
           action: 'get-accommodations',
           params: {
             city: cityId,
+            cityName,
             budget,
-            spots: selectedSpots.map(s => ({ name: s.name, lat: s.lat, lng: s.lng })),
+            budgetLabel,
+            people,
+            days,
+            month,
+            transportToDestination,
+            spots: selectedSpots.map(s => ({ name: s.name, lat: s.lat, lng: s.lng, category: s.category })),
           },
         },
       });

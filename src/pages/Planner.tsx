@@ -169,8 +169,14 @@ const Planner = () => {
               <StepAccommodation
                 key="accommodation"
                 cityId={data.city}
+                cityName={data.cityName}
                 selectedSpots={data.selectedSpots}
                 budget={data.budget}
+                budgetLabel={data.budgetLabel}
+                people={data.people}
+                days={data.days}
+                month={data.month}
+                transportToDestination={data.transportToDestination}
                 onNext={handleAccommodation}
               />
             )}

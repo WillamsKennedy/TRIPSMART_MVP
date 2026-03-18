@@ -110,9 +110,10 @@ export const monthNames = [
 export const monthEmojis = ['☀️', '🎭', '🌧️', '🍂', '🌸', '❄️', '🎿', '🌾', '🍁', '🎃', '🌤️', '🎄'];
 
 export const transportOptions = [
-  { id: 'aviao', label: 'Avião', emoji: '✈️', desc: 'Mais rápido, ideal para longas distâncias' },
   { id: 'onibus', label: 'Ônibus', emoji: '🚌', desc: 'Econômico e com diversas rotas' },
   { id: 'carro', label: 'Carro', emoji: '🚗', desc: 'Flexibilidade total no trajeto' },
+  { id: 'moto', label: 'Moto', emoji: '🏍️', desc: 'Agilidade e economia no deslocamento' },
+  { id: 'bicicleta', label: 'Bicicleta', emoji: '🚲', desc: 'Ecológico e aventureiro' },
 ];
 
 export const localTransportOptions = [

@@ -1,27 +1,35 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Search, Star, Check, MapPin, Filter } from "lucide-react";
-import { pernambucoCities, spotsByCity, monthNames, categoryLabels } from "@/data/mockData";
+import { Search, Star, Check, Loader2 } from "lucide-react";
+import { pernambucoCities, monthNames, categoryLabels } from "@/data/mockData";
+import { supabase } from "@/integrations/supabase/client";
 import type { TouristSpot, CityData } from "@/types/travel";
 
 interface StepCityProps {
   month: number | null;
+  budget: number;
+  budgetLabel: string;
+  people: number;
+  days: number;
+  transportToDestination: string | null;
   preSelectedCity?: string;
   onNext: (cityId: string, cityName: string, spots: TouristSpot[]) => void;
 }
 
 const categories = ['Todos', 'turismo', 'praia', 'trilha', 'entretenimento', 'cultura', 'natureza'];
 
-const StepCity = ({ month, preSelectedCity, onNext }: StepCityProps) => {
+const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestination, preSelectedCity, onNext }: StepCityProps) => {
   const [search, setSearch] = useState("");
   const [selectedCity, setSelectedCity] = useState<CityData | null>(
     preSelectedCity ? pernambucoCities.find(c => c.id === preSelectedCity) || null : null
   );
-  const [sheetOpen, setSheetOpen] = useState(!!preSelectedCity);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedSpots, setSelectedSpots] = useState<TouristSpot[]>([]);
   const [catFilter, setCatFilter] = useState("Todos");
+  const [spots, setSpots] = useState<TouristSpot[]>([]);
+  const [loadingSpots, setLoadingSpots] = useState(false);
 
   const filteredCities = useMemo(() => {
     return pernambucoCities.filter(c =>
@@ -29,11 +37,51 @@ const StepCity = ({ month, preSelectedCity, onNext }: StepCityProps) => {
     );
   }, [search]);
 
-  const spots = useMemo(() => {
-    const all = selectedCity ? spotsByCity[selectedCity.id] || [] : [];
-    if (catFilter === 'Todos') return all;
-    return all.filter(s => s.category === catFilter);
-  }, [selectedCity, catFilter]);
+  const filteredSpots = useMemo(() => {
+    if (catFilter === 'Todos') return spots;
+    return spots.filter(s => s.category === catFilter);
+  }, [spots, catFilter]);
+
+  // Fetch spots from n8n when a city is selected
+  const fetchSpotsFromN8n = async (city: CityData) => {
+    setLoadingSpots(true);
+    setSpots([]);
+    try {
+      const { data, error } = await supabase.functions.invoke('n8n-webhook', {
+        body: {
+          action: 'get-tourist-spots',
+          params: {
+            city: city.id,
+            cityName: city.name,
+            budget,
+            budgetLabel,
+            people,
+            days,
+            month,
+            transportToDestination,
+          },
+        },
+      });
+      if (data?.data && Array.isArray(data.data)) {
+        setSpots(data.data);
+      }
+    } catch {
+      // n8n not configured yet
+    }
+    setLoadingSpots(false);
+  };
+
+  // Auto-open if pre-selected
+  useEffect(() => {
+    if (preSelectedCity) {
+      const city = pernambucoCities.find(c => c.id === preSelectedCity);
+      if (city) {
+        setSelectedCity(city);
+        setSheetOpen(true);
+        fetchSpotsFromN8n(city);
+      }
+    }
+  }, [preSelectedCity]);
 
   const toggleSpot = (spot: TouristSpot) => {
     setSelectedSpots(prev =>
@@ -55,6 +103,7 @@ const StepCity = ({ month, preSelectedCity, onNext }: StepCityProps) => {
     setSelectedSpots([]);
     setCatFilter("Todos");
     setSheetOpen(true);
+    fetchSpotsFromN8n(city);
   };
 
   const handleConfirmSpots = () => {
@@ -93,39 +142,33 @@ const StepCity = ({ month, preSelectedCity, onNext }: StepCityProps) => {
       </div>
 
       <div className="w-full grid gap-3">
-        {filteredCities.map((city, i) => {
-          const citySpots = spotsByCity[city.id] || [];
-          return (
-            <motion.button
-              key={city.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.03, duration: 0.4 }}
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => handleCityClick(city)}
-              className="p-4 rounded-2xl border border-border bg-card text-left transition-shadow hover:shadow-lg hover:border-primary/40"
-              style={{ boxShadow: 'var(--card-shadow)' }}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  {city.imageUrl ? (
-                    <img src={city.imageUrl} alt={city.name} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
-                  ) : (
-                    <span className="text-2xl">{city.imageEmoji}</span>
-                  )}
-                  <div>
-                    <h3 className="text-lg font-bold text-card-foreground">{city.name}</h3>
-                    <p className="text-muted-foreground text-xs mt-0.5">{city.description}</p>
-                  </div>
+        {filteredCities.map((city, i) => (
+          <motion.button
+            key={city.id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.03, duration: 0.4 }}
+            whileHover={{ y: -3 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => handleCityClick(city)}
+            className="p-4 rounded-2xl border border-border bg-card text-left transition-shadow hover:shadow-lg hover:border-primary/40"
+            style={{ boxShadow: 'var(--card-shadow)' }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                {city.imageUrl ? (
+                  <img src={city.imageUrl} alt={city.name} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+                ) : (
+                  <span className="text-2xl">{city.imageEmoji}</span>
+                )}
+                <div>
+                  <h3 className="text-lg font-bold text-card-foreground">{city.name}</h3>
+                  <p className="text-muted-foreground text-xs mt-0.5">{city.description}</p>
                 </div>
-                <span className="text-xs text-primary font-semibold flex-shrink-0">
-                  📍 {citySpots.length} atividades
-                </span>
               </div>
-            </motion.button>
-          );
-        })}
+            </div>
+          </motion.button>
+        ))}
       </div>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -135,7 +178,7 @@ const StepCity = ({ month, preSelectedCity, onNext }: StepCityProps) => {
               {selectedCity?.imageEmoji} {selectedCity?.name}
             </SheetTitle>
             <p className="text-sm text-muted-foreground">
-              Selecione as atividades
+              Atividades serão trazidas pelo n8n
               {month && <> · Viagem em <span className="font-semibold">{monthNames[month - 1]}</span></>}
             </p>
           </SheetHeader>
@@ -158,73 +201,80 @@ const StepCity = ({ month, preSelectedCity, onNext }: StepCityProps) => {
           </div>
 
           <div className="mt-4 space-y-3">
-            {spots.length === 0 && (
-              <p className="text-muted-foreground text-center py-8">
-                Nenhuma atividade encontrada nesta categoria.
-              </p>
-            )}
-            {spots.map((spot) => {
-              const inSeason = isSpotInSeason(spot);
-              const isSelected = selectedSpots.find(s => s.id === spot.id);
-              return (
-                <button
-                  key={spot.id}
-                  onClick={() => toggleSpot(spot)}
-                  className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                    isSelected
-                      ? 'border-primary bg-primary/10'
-                      : 'border-border bg-card hover:border-primary/30'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 flex-1">
-                      {spot.imageUrl ? (
-                        <img src={spot.imageUrl} alt={spot.name} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-                      ) : (
-                        <span className="text-2xl mt-0.5 flex-shrink-0">{spot.imageEmoji}</span>
-                      )}
-                      <div>
-                        <h4 className="font-bold text-foreground">{spot.name}</h4>
-                        <p className="text-sm text-muted-foreground mt-0.5">{spot.description}</p>
-                        <div className="flex flex-wrap items-center gap-2 mt-2">
-                          <span className="flex items-center gap-1 text-xs">
-                            <Star size={12} className="text-primary fill-primary" />
-                            <span className="font-bold text-foreground">{spot.rating}</span>
-                          </span>
-                          {spot.category && (
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/10 text-accent">
-                              {categoryLabels[spot.category]}
+            {loadingSpots ? (
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
+                <Loader2 size={32} className="animate-spin text-primary" />
+                <p className="text-muted-foreground text-sm">Buscando atividades via n8n...</p>
+              </div>
+            ) : filteredSpots.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground mb-2">Nenhuma atividade retornada.</p>
+                <p className="text-xs text-primary font-semibold">Configure o webhook <code>get-tourist-spots</code> no n8n.</p>
+              </div>
+            ) : (
+              filteredSpots.map((spot) => {
+                const inSeason = isSpotInSeason(spot);
+                const isSelected = selectedSpots.find(s => s.id === spot.id);
+                return (
+                  <button
+                    key={spot.id}
+                    onClick={() => toggleSpot(spot)}
+                    className={`w-full text-left p-4 rounded-2xl border transition-all ${
+                      isSelected
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-card hover:border-primary/30'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 flex-1">
+                        {spot.imageUrl ? (
+                          <img src={spot.imageUrl} alt={spot.name} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                        ) : (
+                          <span className="text-2xl mt-0.5 flex-shrink-0">{spot.imageEmoji}</span>
+                        )}
+                        <div>
+                          <h4 className="font-bold text-foreground">{spot.name}</h4>
+                          <p className="text-sm text-muted-foreground mt-0.5">{spot.description}</p>
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <span className="flex items-center gap-1 text-xs">
+                              <Star size={12} className="text-primary fill-primary" />
+                              <span className="font-bold text-foreground">{spot.rating}</span>
                             </span>
-                          )}
-                          {spot.avgCostPerPerson !== undefined && (
-                            <span className="text-xs font-semibold text-accent">
-                              {spot.avgCostPerPerson === 0 ? 'Gratuito' : `~R$ ${spot.avgCostPerPerson}/pessoa`}
-                            </span>
-                          )}
-                          {inSeason ? (
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-secondary/20 text-secondary">
-                              🔥 Em alta
-                            </span>
-                          ) : (
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted/20 text-muted-foreground">
-                              Melhor em {getBestMonth(spot)}
-                            </span>
-                          )}
+                            {spot.category && (
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+                                {categoryLabels[spot.category]}
+                              </span>
+                            )}
+                            {spot.avgCostPerPerson !== undefined && (
+                              <span className="text-xs font-semibold text-accent">
+                                {spot.avgCostPerPerson === 0 ? 'Gratuito' : `~R$ ${spot.avgCostPerPerson}/pessoa`}
+                              </span>
+                            )}
+                            {inSeason ? (
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-secondary/20 text-secondary">
+                                🔥 Em alta
+                              </span>
+                            ) : spot.peakMonths?.length > 0 ? (
+                              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted/20 text-muted-foreground">
+                                Melhor em {getBestMonth(spot)}
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
+                      {isSelected && (
+                        <div className="w-6 h-6 rounded-full gradient-tropical flex items-center justify-center flex-shrink-0">
+                          <Check size={14} className="text-primary-foreground" />
+                        </div>
+                      )}
                     </div>
-                    {isSelected && (
-                      <div className="w-6 h-6 rounded-full gradient-tropical flex items-center justify-center flex-shrink-0">
-                        <Check size={14} className="text-primary-foreground" />
-                      </div>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })
+            )}
           </div>
 
-          {(spotsByCity[selectedCity?.id || ''] || []).length > 0 && (
+          {spots.length > 0 && (
             <div className="mt-6 sticky bottom-0 bg-background pt-4 pb-2">
               <Button
                 onClick={handleConfirmSpots}
