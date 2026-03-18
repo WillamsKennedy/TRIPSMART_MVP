@@ -5,8 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const N8N_BASE_URL = 'https://willamsknd.app.n8n.cloud/webhook-teste';
-
+const N8N_BASE_URL = 'https://willamsknd.app.n8n.cloud/webhook';
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
