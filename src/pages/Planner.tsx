@@ -152,7 +152,19 @@ const Planner = () => {
             {step === 'group' && <StepGroupType key="group" people={data.people} onNext={handleGroupType} />}
             {step === 'month' && <StepMonth key="month" onNext={handleMonth} />}
             {step === 'transport-arrival' && <StepTransportArrival key="transport" onNext={handleTransportArrival} />}
-            {step === 'city' && <StepCity key="city" month={data.month} preSelectedCity={preSelectedCity} onNext={handleCity} />}
+            {step === 'city' && (
+              <StepCity
+                key="city"
+                month={data.month}
+                budget={data.budget}
+                budgetLabel={data.budgetLabel}
+                people={data.people}
+                days={data.days}
+                transportToDestination={data.transportToDestination}
+                preSelectedCity={preSelectedCity}
+                onNext={handleCity}
+              />
+            )}
             {step === 'accommodation' && (
               <StepAccommodation
                 key="accommodation"
