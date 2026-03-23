@@ -26,7 +26,7 @@ const BudgetBar = ({ total, spent, currency = "R$" }: BudgetBarProps) => {
       </div>
       <div className="h-1.5 w-full rounded-full bg-border overflow-hidden">
         <motion.div
-          className={`h-full rounded-full ${isOver ? "bg-destructive" : "gradient-tropical"}`}
+          className={`h-full rounded-full ${isOver ? "bg-destructive" : "gradient-pe"}`}
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.5 }}

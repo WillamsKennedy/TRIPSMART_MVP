@@ -45,7 +45,7 @@ const StepMonth = ({ onNext }: StepMonthProps) => {
               <span className="text-2xl block">{monthEmojis[i]}</span>
               <span className="text-sm font-bold text-foreground block mt-1">{name}</span>
               {isCurrent && (
-                <span className="absolute -top-2 -right-2 text-[10px] font-bold px-2 py-0.5 rounded-full gradient-tropical text-primary-foreground">
+                <span className="absolute -top-2 -right-2 text-[10px] font-bold px-2 py-0.5 rounded-full gradient-pe text-primary-foreground">
                   Atual
                 </span>
               )}

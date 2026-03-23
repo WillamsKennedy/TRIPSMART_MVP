@@ -137,7 +137,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col items-center gap-8 w-full"
     >
-      <div className="w-16 h-16 rounded-full gradient-tropical flex items-center justify-center">
+      <div className="w-16 h-16 rounded-full gradient-pe flex items-center justify-center">
         <Check size={32} className="text-primary-foreground" />
       </div>
 
@@ -248,7 +248,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
             <Button
               onClick={generateItinerary}
               disabled={loadingItinerary}
-              className="mt-3 gradient-tropical border-0 rounded-full font-bold gap-2"
+              className="mt-3 gradient-pe border-0 rounded-full font-bold gap-2"
             >
               <CalendarDays size={16} /> {loadingItinerary ? 'Gerando roteiro...' : 'Gerar roteiro com IA'}
             </Button>
@@ -259,7 +259,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
         {!saved && (
-          <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-tropical border-0 rounded-full font-bold gap-2">
+          <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2">
             <Save size={16} /> {saving ? 'Salvando...' : 'Salvar no histórico'}
           </Button>
         )}
