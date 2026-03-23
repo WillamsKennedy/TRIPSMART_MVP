@@ -279,7 +279,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
               <Button
                 onClick={handleConfirmSpots}
                 disabled={selectedSpots.length === 0}
-                className="w-full h-14 rounded-full text-lg font-bold gradient-tropical border-0"
+                className="w-full h-14 rounded-full text-lg font-bold gradient-pe border-0 text-primary-foreground"
               >
                 Confirmar {selectedSpots.length} atividade{selectedSpots.length !== 1 ? 's' : ''}
               </Button>

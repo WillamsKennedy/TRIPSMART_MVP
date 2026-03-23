@@ -233,7 +233,7 @@ const Community = () => {
                         placeholder="Escrever comentário..."
                         className="flex-1 bg-background border border-border rounded-full px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
                       />
-                      <Button size="icon" onClick={() => postComment(it.id)} className="rounded-full gradient-tropical border-0 h-9 w-9">
+                      <Button size="icon" onClick={() => postComment(it.id)} className="rounded-full gradient-pe border-0 h-9 w-9">
                         <Send size={14} className="text-primary-foreground" />
                       </Button>
                     </div>
