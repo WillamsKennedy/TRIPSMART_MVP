@@ -129,7 +129,7 @@ const Community = () => {
           <div className="text-center py-20">
             <Users size={48} className="mx-auto text-muted-foreground mb-4" />
             <p className="text-lg text-muted-foreground">Nenhum roteiro compartilhado ainda.</p>
-            <Button onClick={() => navigate('/planejar')} className="mt-6 gradient-tropical border-0 rounded-full px-6 font-bold">Criar o primeiro roteiro</Button>
+            <Button onClick={() => navigate('/planejar')} className="mt-6 gradient-pe border-0 rounded-full px-6 font-bold text-primary-foreground">Criar o primeiro roteiro</Button>
           </div>
         ) : (
           <div className="space-y-6">
