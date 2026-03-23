@@ -263,7 +263,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
                         </div>
                       </div>
                       {isSelected && (
-                        <div className="w-6 h-6 rounded-full gradient-tropical flex items-center justify-center flex-shrink-0">
+                        <div className="w-6 h-6 rounded-full gradient-pe flex items-center justify-center flex-shrink-0">
                           <Check size={14} className="text-primary-foreground" />
                         </div>
                       )}
