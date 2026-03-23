@@ -145,7 +145,7 @@ const Community = () => {
                 <div className="p-5">
                   {/* Author */}
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full gradient-tropical flex items-center justify-center text-xs font-bold text-primary-foreground">
+                    <div className="w-8 h-8 rounded-full gradient-pe flex items-center justify-center text-xs font-bold text-primary-foreground">
                       {(it.profiles?.display_name || 'U')[0].toUpperCase()}
                     </div>
                     <div>
