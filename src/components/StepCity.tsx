@@ -191,7 +191,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
                 onClick={() => setCatFilter(cat)}
                 className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
                   catFilter === cat
-                    ? 'gradient-tropical text-primary-foreground'
+                    ? 'gradient-pe text-primary-foreground'
                     : 'bg-card border border-border text-muted-foreground hover:border-primary/40'
                 }`}
               >
