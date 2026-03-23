@@ -59,7 +59,7 @@ const StepBudget = ({ onNext }: StepBudgetProps) => {
               <span className="text-xs text-muted-foreground">{b.description}</span>
             </div>
             {selectedBudget === b.id && (
-              <div className="w-6 h-6 rounded-full gradient-tropical flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 rounded-full gradient-pe flex items-center justify-center flex-shrink-0">
                 <Check size={14} className="text-primary-foreground" />
               </div>
             )}
@@ -117,7 +117,7 @@ const StepBudget = ({ onNext }: StepBudgetProps) => {
       <Button
         disabled={!canProceed}
         onClick={() => budgetData && onNext(budgetData.max, budgetData.label, people, days)}
-        className="w-full max-w-xs h-14 rounded-full text-lg font-bold gradient-tropical border-0 shadow-lg"
+        className="w-full max-w-xs h-14 rounded-full text-lg font-bold gradient-pe border-0 shadow-lg"
       >
         Continuar
       </Button>

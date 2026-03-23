@@ -191,7 +191,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
                 onClick={() => setCatFilter(cat)}
                 className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
                   catFilter === cat
-                    ? 'gradient-tropical text-primary-foreground'
+                    ? 'gradient-pe text-primary-foreground'
                     : 'bg-card border border-border text-muted-foreground hover:border-primary/40'
                 }`}
               >
@@ -263,7 +263,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
                         </div>
                       </div>
                       {isSelected && (
-                        <div className="w-6 h-6 rounded-full gradient-tropical flex items-center justify-center flex-shrink-0">
+                        <div className="w-6 h-6 rounded-full gradient-pe flex items-center justify-center flex-shrink-0">
                           <Check size={14} className="text-primary-foreground" />
                         </div>
                       )}
@@ -279,7 +279,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
               <Button
                 onClick={handleConfirmSpots}
                 disabled={selectedSpots.length === 0}
-                className="w-full h-14 rounded-full text-lg font-bold gradient-tropical border-0"
+                className="w-full h-14 rounded-full text-lg font-bold gradient-pe border-0 text-primary-foreground"
               >
                 Confirmar {selectedSpots.length} atividade{selectedSpots.length !== 1 ? 's' : ''}
               </Button>

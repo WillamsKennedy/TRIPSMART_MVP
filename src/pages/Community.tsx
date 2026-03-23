@@ -120,7 +120,7 @@ const Community = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
             <ArrowLeft size={20} />
           </Button>
-          <h1 className="text-3xl font-extrabold tracking-display text-foreground">Comunidade</h1>
+          <h1 className="text-3xl font-black tracking-display text-foreground">Comunidade</h1>
         </div>
 
         {loading ? (
@@ -129,7 +129,7 @@ const Community = () => {
           <div className="text-center py-20">
             <Users size={48} className="mx-auto text-muted-foreground mb-4" />
             <p className="text-lg text-muted-foreground">Nenhum roteiro compartilhado ainda.</p>
-            <Button onClick={() => navigate('/planejar')} className="mt-6 gradient-tropical border-0 rounded-full px-6 font-bold">Criar o primeiro roteiro</Button>
+            <Button onClick={() => navigate('/planejar')} className="mt-6 gradient-pe border-0 rounded-full px-6 font-bold text-primary-foreground">Criar o primeiro roteiro</Button>
           </div>
         ) : (
           <div className="space-y-6">
@@ -145,7 +145,7 @@ const Community = () => {
                 <div className="p-5">
                   {/* Author */}
                   <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-full gradient-tropical flex items-center justify-center text-xs font-bold text-primary-foreground">
+                    <div className="w-8 h-8 rounded-full gradient-pe flex items-center justify-center text-xs font-bold text-primary-foreground">
                       {(it.profiles?.display_name || 'U')[0].toUpperCase()}
                     </div>
                     <div>
@@ -233,7 +233,7 @@ const Community = () => {
                         placeholder="Escrever comentário..."
                         className="flex-1 bg-background border border-border rounded-full px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
                       />
-                      <Button size="icon" onClick={() => postComment(it.id)} className="rounded-full gradient-tropical border-0 h-9 w-9">
+                      <Button size="icon" onClick={() => postComment(it.id)} className="rounded-full gradient-pe border-0 h-9 w-9">
                         <Send size={14} className="text-primary-foreground" />
                       </Button>
                     </div>

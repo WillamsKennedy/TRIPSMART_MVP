@@ -62,7 +62,7 @@ const TravelHistory = () => {
           <div className="text-center py-20">
             <Plane size={48} className="mx-auto text-muted-foreground mb-4" />
             <p className="text-lg text-muted-foreground">Nenhuma viagem planejada ainda.</p>
-            <Button onClick={() => navigate('/planejar')} className="mt-6 gradient-tropical border-0 rounded-full px-6 font-bold">
+            <Button onClick={() => navigate('/planejar')} className="mt-6 gradient-pe border-0 rounded-full px-6 font-bold text-primary-foreground">
               Planejar primeira viagem
             </Button>
           </div>
