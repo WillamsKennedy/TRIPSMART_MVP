@@ -120,7 +120,7 @@ const Community = () => {
           <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
             <ArrowLeft size={20} />
           </Button>
-          <h1 className="text-3xl font-extrabold tracking-display text-foreground">Comunidade</h1>
+          <h1 className="text-3xl font-black tracking-display text-foreground">Comunidade</h1>
         </div>
 
         {loading ? (
