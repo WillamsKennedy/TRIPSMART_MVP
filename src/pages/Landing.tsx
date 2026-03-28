@@ -185,7 +185,7 @@ const Landing = () => {
                 transition={{ delay: i * 0.04, duration: 0.4 }}
                 whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => goToPlanner(cityId)}
+                onClick={() => navigate(`/atividade/${cityId}/${spot.id}`)}
                 className="rounded-2xl border border-border bg-card text-left overflow-hidden hover:border-primary/40 transition-all"
                 style={{ boxShadow: 'var(--card-shadow)' }}
               >
