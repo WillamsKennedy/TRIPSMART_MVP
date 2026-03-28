@@ -27,6 +27,7 @@ const App = () => (
             <Route path="/planejar" element={<Planner />} />
             <Route path="/historico" element={<TravelHistory />} />
             <Route path="/comunidade" element={<Community />} />
+            <Route path="/atividade/:cityId/:spotId" element={<ActivityDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
