@@ -9,6 +9,7 @@ const corsHeaders = {
 // Use /webhook-test/ para testar no editor do n8n (workflow NÃO precisa estar ativo)
 // Use /webhook/ para produção (workflow PRECISA estar ativo via toggle no canto superior direito)
 const N8N_BASE_URL = Deno.env.get("N8N_WEBHOOK_URL") || "https://n8n.grupounibra.com/webhook";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
