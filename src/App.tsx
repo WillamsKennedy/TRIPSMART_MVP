@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Planner from "./pages/Planner";
 import TravelHistory from "./pages/TravelHistory";
 import Community from "./pages/Community";
+import ActivityDetail from "./pages/ActivityDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
