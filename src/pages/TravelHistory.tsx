@@ -44,7 +44,7 @@ const TravelHistory = () => {
       .from('travel_history')
       .select('*')
       .order('created_at', { ascending: false });
-    setRecords((data as TravelRecord[]) || []);
+    setRecords((data as unknown as TravelRecord[]) || []);
     setLoading(false);
   };
 
