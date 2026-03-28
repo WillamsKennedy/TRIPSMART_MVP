@@ -18,12 +18,21 @@ interface StepCityProps {
   onNext: (cityId: string, cityName: string, spots: TouristSpot[]) => void;
 }
 
-const categories = ['Todos', 'turismo', 'praia', 'trilha', 'entretenimento', 'cultura', 'natureza'];
+const categories = ["Todos", "turismo", "praia", "trilha", "entretenimento", "cultura", "natureza"];
 
-const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestination, preSelectedCity, onNext }: StepCityProps) => {
+const StepCity = ({
+  month,
+  budget,
+  budgetLabel,
+  people,
+  days,
+  transportToDestination,
+  preSelectedCity,
+  onNext,
+}: StepCityProps) => {
   const [search, setSearch] = useState("");
   const [selectedCity, setSelectedCity] = useState<CityData | null>(
-    preSelectedCity ? pernambucoCities.find(c => c.id === preSelectedCity) || null : null
+    preSelectedCity ? pernambucoCities.find((c) => c.id === preSelectedCity) || null : null,
   );
   const [sheetOpen, setSheetOpen] = useState(false);
   const [selectedSpots, setSelectedSpots] = useState<TouristSpot[]>([]);
@@ -32,14 +41,12 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
   const [loadingSpots, setLoadingSpots] = useState(false);
 
   const filteredCities = useMemo(() => {
-    return pernambucoCities.filter(c =>
-      c.name.toLowerCase().includes(search.toLowerCase())
-    );
+    return pernambucoCities.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
   }, [search]);
 
   const filteredSpots = useMemo(() => {
-    if (catFilter === 'Todos') return spots;
-    return spots.filter(s => s.category === catFilter);
+    if (catFilter === "Todos") return spots;
+    return spots.filter((s) => s.category === catFilter);
   }, [spots, catFilter]);
 
   // Fetch spots from n8n when a city is selected
@@ -47,9 +54,9 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
     setLoadingSpots(true);
     setSpots([]);
     try {
-      const { data, error } = await supabase.functions.invoke('n8n-webhook', {
+      const { data, error } = await supabase.functions.invoke("n8n-webhook", {
         body: {
-          action: 'get-tourist-spots',
+          action: "get-tourist-spots",
           params: {
             city: city.id,
             cityName: city.name,
@@ -74,7 +81,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
   // Auto-open if pre-selected
   useEffect(() => {
     if (preSelectedCity) {
-      const city = pernambucoCities.find(c => c.id === preSelectedCity);
+      const city = pernambucoCities.find((c) => c.id === preSelectedCity);
       if (city) {
         setSelectedCity(city);
         setSheetOpen(true);
@@ -84,17 +91,15 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
   }, [preSelectedCity]);
 
   const toggleSpot = (spot: TouristSpot) => {
-    setSelectedSpots(prev =>
-      prev.find(s => s.id === spot.id)
-        ? prev.filter(s => s.id !== spot.id)
-        : [...prev, spot]
+    setSelectedSpots((prev) =>
+      prev.find((s) => s.id === spot.id) ? prev.filter((s) => s.id !== spot.id) : [...prev, spot],
     );
   };
 
-  const isSpotInSeason = (spot: TouristSpot) => month ? spot.peakMonths.includes(month) : true;
+  const isSpotInSeason = (spot: TouristSpot) => (month ? spot.peakMonths.includes(month) : true);
 
   const getBestMonth = (spot: TouristSpot) => {
-    if (!spot.peakMonths.length) return '';
+    if (!spot.peakMonths.length) return "";
     return monthNames[spot.peakMonths[0] - 1];
   };
 
@@ -126,11 +131,19 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
         </h2>
         <p className="text-muted-foreground text-lg">
           Selecione a cidade e as atividades
-          {month && <> · <span className="font-semibold">{monthNames[month - 1]}</span></>}
+          {month && (
+            <>
+              {" "}
+              · <span className="font-semibold">{monthNames[month - 1]}</span>
+            </>
+          )}
         </p>
       </div>
 
-      <div className="w-full max-w-md flex items-center gap-2 px-4 py-3 bg-card rounded-2xl border border-border" style={{ boxShadow: 'var(--card-shadow)' }}>
+      <div
+        className="w-full max-w-md flex items-center gap-2 px-4 py-3 bg-card rounded-2xl border border-border"
+        style={{ boxShadow: "var(--card-shadow)" }}
+      >
         <Search size={18} className="text-muted-foreground" />
         <input
           type="text"
@@ -152,12 +165,16 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
             whileTap={{ scale: 0.98 }}
             onClick={() => handleCityClick(city)}
             className="p-4 rounded-2xl border border-border bg-card text-left transition-shadow hover:shadow-lg hover:border-primary/40"
-            style={{ boxShadow: 'var(--card-shadow)' }}
+            style={{ boxShadow: "var(--card-shadow)" }}
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 {city.imageUrl ? (
-                  <img src={city.imageUrl} alt={city.name} className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
+                  <img
+                    src={city.imageUrl}
+                    alt={city.name}
+                    className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
+                  />
                 ) : (
                   <span className="text-2xl">{city.imageEmoji}</span>
                 )}
@@ -179,23 +196,28 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
             </SheetTitle>
             <p className="text-sm text-muted-foreground">
               Atividades serão trazidas pelo n8n
-              {month && <> · Viagem em <span className="font-semibold">{monthNames[month - 1]}</span></>}
+              {month && (
+                <>
+                  {" "}
+                  · Viagem em <span className="font-semibold">{monthNames[month - 1]}</span>
+                </>
+              )}
             </p>
           </SheetHeader>
 
           {/* Category filter */}
           <div className="flex flex-wrap gap-2 mt-4">
-            {categories.map(cat => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCatFilter(cat)}
                 className={`text-xs font-bold px-3 py-1.5 rounded-full transition-all ${
                   catFilter === cat
-                    ? 'gradient-pe text-primary-foreground'
-                    : 'bg-card border border-border text-muted-foreground hover:border-primary/40'
+                    ? "gradient-pe text-primary-foreground"
+                    : "bg-card border border-border text-muted-foreground hover:border-primary/40"
                 }`}
               >
-                {cat === 'Todos' ? '🔄 Todos' : categoryLabels[cat] || cat}
+                {cat === "Todos" ? "🔄 Todos" : categoryLabels[cat] || cat}
               </button>
             ))}
           </div>
@@ -204,31 +226,35 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
             {loadingSpots ? (
               <div className="flex flex-col items-center justify-center py-12 gap-3">
                 <Loader2 size={32} className="animate-spin text-primary" />
-                <p className="text-muted-foreground text-sm">Buscando atividades via n8n...</p>
+                <p className="text-muted-foreground text-sm">Buscando pontos turisticos..</p>
               </div>
             ) : filteredSpots.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-2">Nenhuma atividade retornada.</p>
-                <p className="text-xs text-primary font-semibold">Configure o webhook <code>get-tourist-spots</code> no n8n.</p>
+                <p className="text-xs text-primary font-semibold">
+                  Configure o webhook <code>get-tourist-spots</code> no n8n.
+                </p>
               </div>
             ) : (
               filteredSpots.map((spot) => {
                 const inSeason = isSpotInSeason(spot);
-                const isSelected = selectedSpots.find(s => s.id === spot.id);
+                const isSelected = selectedSpots.find((s) => s.id === spot.id);
                 return (
                   <button
                     key={spot.id}
                     onClick={() => toggleSpot(spot)}
                     className={`w-full text-left p-4 rounded-2xl border transition-all ${
-                      isSelected
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border bg-card hover:border-primary/30'
+                      isSelected ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/30"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1">
                         {spot.imageUrl ? (
-                          <img src={spot.imageUrl} alt={spot.name} className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                          <img
+                            src={spot.imageUrl}
+                            alt={spot.name}
+                            className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+                          />
                         ) : (
                           <span className="text-2xl mt-0.5 flex-shrink-0">{spot.imageEmoji}</span>
                         )}
@@ -247,7 +273,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
                             )}
                             {spot.avgCostPerPerson !== undefined && (
                               <span className="text-xs font-semibold text-accent">
-                                {spot.avgCostPerPerson === 0 ? 'Gratuito' : `~R$ ${spot.avgCostPerPerson}/pessoa`}
+                                {spot.avgCostPerPerson === 0 ? "Gratuito" : `~R$ ${spot.avgCostPerPerson}/pessoa`}
                               </span>
                             )}
                             {inSeason ? (
@@ -281,7 +307,7 @@ const StepCity = ({ month, budget, budgetLabel, people, days, transportToDestina
                 disabled={selectedSpots.length === 0}
                 className="w-full h-14 rounded-full text-lg font-bold gradient-pe border-0 text-primary-foreground"
               >
-                Confirmar {selectedSpots.length} atividade{selectedSpots.length !== 1 ? 's' : ''}
+                Confirmar {selectedSpots.length} atividade{selectedSpots.length !== 1 ? "s" : ""}
               </Button>
             </div>
           )}
