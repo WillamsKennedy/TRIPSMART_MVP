@@ -121,9 +121,6 @@ const StepAccommodation = ({
         ) : accommodations.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">Erro: Não foi possivel encontrar hospedagens, tente novamente.</p>
-            <p className="text-xs text-primary font-semibold">
-              Webhook: <code>get-accommodations</code>
-            </p>
           </div>
         ) : (
           accommodations.map((acc, i) => {
