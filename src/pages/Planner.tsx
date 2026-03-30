@@ -81,7 +81,7 @@ const Planner = () => {
       {step !== 'summary' && step !== 'budget' && (
         <div className="flex justify-center items-center gap-1.5 pt-5 pb-3 px-6 overflow-x-auto">
           {activeSteps.map((s, i) => (
-            <div key={s} className={`h-2 rounded-full transition-all flex-shrink-0 ${i <= currentIdx ? 'w-7 gradient-pe' : 'w-3 bg-border'}`} />
+            <div key={s} className={`h-2 rounded-full transition-all flex-shrink-0 ${i <= currentIdx ? 'w-7 bg-pe-gold' : 'w-3 bg-border'}`} />
           ))}
         </div>
       )}
