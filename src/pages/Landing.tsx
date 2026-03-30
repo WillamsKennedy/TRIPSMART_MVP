@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   MapPin, Sun, Compass, Star, ArrowRight, LogOut, History,
   Search, Filter, Users, Navigation, ChevronUp, Palmtree, Utensils, Waves, Mountain,
+  User,
 } from "lucide-react";
 import { pernambucoCities, spotsByCity, categoryLabels } from "@/data/mockData";
 
