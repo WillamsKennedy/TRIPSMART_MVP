@@ -88,7 +88,6 @@ const Planner = () => {
         <div className="w-full max-w-3xl">
           <AnimatePresence mode="wait">
             {step === 'budget' && <StepBudget key="budget" onNext={handleBudget} />}
-            {step === 'group' && <StepGroupType key="group" people={data.people} onNext={handleGroupType} />}
             {step === 'month' && <StepMonth key="month" onNext={handleMonth} />}
             {step === 'transport-arrival' && <StepTransportArrival key="transport" onNext={handleTransportArrival} />}
             {step === 'city' && (
