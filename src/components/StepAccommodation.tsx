@@ -104,11 +104,13 @@ const StepAccommodation = ({
 
       {/* Budget remaining */}
       <div className="w-full max-w-lg p-3 rounded-xl bg-primary/5 border border-primary/20 text-center">
-        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Orçamento restante estimado</span>
+        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Orçamento restante estimado
+        </span>
         <p className="text-lg font-extrabold text-primary">
-          R$ {remainingBudget.toLocaleString('pt-BR')}
+          R$ {remainingBudget.toLocaleString("pt-BR")}
           <span className="text-xs text-muted-foreground font-normal ml-2">
-            (R$ {spotsCost.toLocaleString('pt-BR')} em atividades)
+            (R$ {spotsCost.toLocaleString("pt-BR")} em atividades)
           </span>
         </p>
       </div>
@@ -118,9 +120,7 @@ const StepAccommodation = ({
           <p className="text-center py-8 text-muted-foreground">Buscando hospedagens...</p>
         ) : accommodations.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">
-              Hospedagens serão carregadas quando o webhook do n8n estiver configurado.
-            </p>
+            <p className="text-muted-foreground mb-4">Erro: Não foi possivel encontrar hospedagens, tente novamente.</p>
             <p className="text-xs text-primary font-semibold">
               Webhook: <code>get-accommodations</code>
             </p>
@@ -140,7 +140,7 @@ const StepAccommodation = ({
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onNext(acc)}
                 className={`p-5 rounded-2xl border text-left transition-all hover:shadow-lg hover:border-primary/40 ${
-                  withinBudget ? 'border-border bg-card' : 'border-destructive/30 bg-destructive/5'
+                  withinBudget ? "border-border bg-card" : "border-destructive/30 bg-destructive/5"
                 }`}
                 style={{ boxShadow: "var(--card-shadow)" }}
               >
@@ -156,7 +156,7 @@ const StepAccommodation = ({
                     <span className="text-xl font-extrabold text-foreground">R$ {acc.pricePerNight}</span>
                     <span className="text-xs text-muted-foreground block">/noite</span>
                     <span className="text-xs font-semibold text-primary block">
-                      Total: R$ {totalCost.toLocaleString('pt-BR')}
+                      Total: R$ {totalCost.toLocaleString("pt-BR")}
                     </span>
                   </div>
                 </div>
@@ -174,9 +174,7 @@ const StepAccommodation = ({
                       <span className="text-xs">da atividade principal</span>
                     </span>
                   )}
-                  {!withinBudget && (
-                    <span className="text-xs font-bold text-destructive">⚠ Acima do orçamento</span>
-                  )}
+                  {!withinBudget && <span className="text-xs font-bold text-destructive">⚠ Acima do orçamento</span>}
                 </div>
               </motion.button>
             );
