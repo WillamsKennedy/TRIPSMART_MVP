@@ -89,7 +89,7 @@ const StepAccommodation = ({
       </div>
       <div className="grid gap-4 w-full max-w-lg">
         {loading ? (
-          <p className="text-center py-8 text-muted-foreground">Buscando hospedagens via n8n...</p>
+          <p className="text-center py-8 text-muted-foreground">Buscando hospedagens...</p>
         ) : accommodations.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">
