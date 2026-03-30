@@ -85,7 +85,7 @@ const StepAccommodation = ({
     >
       <div className="text-center space-y-2">
         <h2 className="text-3xl md:text-4xl font-extrabold tracking-display text-foreground">Onde vai ficar?</h2>
-        <p className="text-muted-foreground text-lg">Procurando hospedagens</p>
+        <p className="text-muted-foreground text-lg">Hospedagens</p>
       </div>
       <div className="grid gap-4 w-full max-w-lg">
         {loading ? (
