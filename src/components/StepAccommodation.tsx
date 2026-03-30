@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, Shield, MapPin } from "lucide-react";
+import { Star, MapPin, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import type { AccommodationDetail, TouristSpot } from "@/types/travel";
@@ -17,6 +17,16 @@ interface StepAccommodationProps {
   transportToDestination: string | null;
   onNext: (accommodation: AccommodationDetail) => void;
 }
+
+// Haversine distance in km
+const haversineKm = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+  const toRad = (v: number) => (v * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
 
 const StepAccommodation = ({
   cityId,
@@ -60,7 +70,6 @@ const StepAccommodation = ({
       if (data?.data && Array.isArray(data.data)) {
         setAccommodations(data.data);
       } else {
-        // Fallback: empty state for n8n
         setAccommodations([]);
       }
     } catch {
@@ -69,11 +78,16 @@ const StepAccommodation = ({
     setLoading(false);
   };
 
-  const getSafetyLabel = (score: number) => {
-    if (score >= 4.5) return { label: "Muito seguro", color: "text-secondary" };
-    if (score >= 3.5) return { label: "Seguro", color: "text-primary" };
-    return { label: "Atenção", color: "text-destructive" };
+  // Calculate distance from accommodation to the main (first) selected spot
+  const getDistanceToMainSpot = (acc: AccommodationDetail) => {
+    if (!selectedSpots.length || !acc.lat || !acc.lng) return null;
+    const main = selectedSpots[0];
+    return haversineKm(acc.lat, acc.lng, main.lat, main.lng);
   };
+
+  // Spent so far estimate (spots avg cost)
+  const spotsCost = selectedSpots.reduce((sum, s) => sum + (s.avgCostPerPerson || 0), 0) * people;
+  const remainingBudget = budget - spotsCost;
 
   return (
     <motion.div
@@ -85,8 +99,20 @@ const StepAccommodation = ({
     >
       <div className="text-center space-y-2">
         <h2 className="text-3xl md:text-4xl font-extrabold tracking-display text-foreground">Onde vai ficar?</h2>
-        <p className="text-muted-foreground text-lg">Hospedagens</p>
+        <p className="text-muted-foreground text-lg">Hospedagens em {cityName}</p>
       </div>
+
+      {/* Budget remaining */}
+      <div className="w-full max-w-lg p-3 rounded-xl bg-primary/5 border border-primary/20 text-center">
+        <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Orçamento restante estimado</span>
+        <p className="text-lg font-extrabold text-primary">
+          R$ {remainingBudget.toLocaleString('pt-BR')}
+          <span className="text-xs text-muted-foreground font-normal ml-2">
+            (R$ {spotsCost.toLocaleString('pt-BR')} em atividades)
+          </span>
+        </p>
+      </div>
+
       <div className="grid gap-4 w-full max-w-lg">
         {loading ? (
           <p className="text-center py-8 text-muted-foreground">Buscando hospedagens...</p>
@@ -101,17 +127,21 @@ const StepAccommodation = ({
           </div>
         ) : (
           accommodations.map((acc, i) => {
-            const safety = getSafetyLabel(acc.safetyScore);
+            const distKm = getDistanceToMainSpot(acc);
+            const totalCost = acc.pricePerNight * days;
+            const withinBudget = totalCost <= remainingBudget;
             return (
               <motion.button
-                key={acc.id}
+                key={acc.id || i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08, duration: 0.4 }}
                 whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onNext(acc)}
-                className="p-5 rounded-2xl border border-border bg-card text-left transition-all hover:shadow-lg hover:border-primary/40"
+                className={`p-5 rounded-2xl border text-left transition-all hover:shadow-lg hover:border-primary/40 ${
+                  withinBudget ? 'border-border bg-card' : 'border-destructive/30 bg-destructive/5'
+                }`}
                 style={{ boxShadow: "var(--card-shadow)" }}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -125,20 +155,28 @@ const StepAccommodation = ({
                   <div className="text-right flex-shrink-0">
                     <span className="text-xl font-extrabold text-foreground">R$ {acc.pricePerNight}</span>
                     <span className="text-xs text-muted-foreground block">/noite</span>
+                    <span className="text-xs font-semibold text-primary block">
+                      Total: R$ {totalCost.toLocaleString('pt-BR')}
+                    </span>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-3">
-                  <span className="flex items-center gap-1 text-sm">
-                    <Star size={14} className="text-primary fill-primary" />
-                    <span className="font-bold text-foreground">{acc.rating}</span>
-                  </span>
-                  <span className={`flex items-center gap-1 text-sm ${safety.color}`}>
-                    <Shield size={14} />
-                    <span className="font-bold">{safety.label}</span>
-                  </span>
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <MapPin size={12} /> {acc.distanceToSpots}km dos pontos
-                  </span>
+                  {acc.rating && (
+                    <span className="flex items-center gap-1 text-sm">
+                      <Star size={14} className="text-primary fill-primary" />
+                      <span className="font-bold text-foreground">{acc.rating}</span>
+                    </span>
+                  )}
+                  {distKm !== null && (
+                    <span className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Navigation size={14} />
+                      <span className="font-bold">{distKm.toFixed(1)}km</span>
+                      <span className="text-xs">da atividade principal</span>
+                    </span>
+                  )}
+                  {!withinBudget && (
+                    <span className="text-xs font-bold text-destructive">⚠ Acima do orçamento</span>
+                  )}
                 </div>
               </motion.button>
             );

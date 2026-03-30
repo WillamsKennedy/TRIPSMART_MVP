@@ -46,12 +46,10 @@ const Planner = () => {
   const handleBudget = (budget: number, budgetLabel: string, people: number, days: number, adults: number, children: number, isCouple: boolean, rooms: number) => {
     const groupType = people === 1 ? "solo" : isCouple ? "couple" : data.groupType === "solo" ? "friends" : data.groupType;
     setData(d => ({ ...d, budget, budgetLabel, people, days, adults, children, isCouple, rooms, groupType }));
-    if (isCouple) {
+    if (isCouple || people <= 1) {
       setStep('month');
-    } else if (people > 1) {
-      setStep('group');
     } else {
-      setStep('month');
+      setStep('group');
     }
   };
   const handleGroupType = (type: "couple" | "friends") => { setData(d => ({ ...d, groupType: type })); setStep('month'); };

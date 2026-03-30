@@ -59,7 +59,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     setSharing(true);
 
     // Save to community
-    const { error: shareError } = await supabase.from('shared_itineraries' as any).insert({
+    const { error: shareError } = await supabase.from('shared_itineraries').insert({
       user_id: user.id,
       title: `${data.days} dias em ${data.cityName}`,
       description: `Roteiro de ${data.days} dias em ${data.cityName}, PE · ${data.adults} adulto${data.adults > 1 ? 's' : ''}${data.children > 0 ? ` + ${data.children} criança${data.children > 1 ? 's' : ''}` : ''} · ${data.rooms} quarto${data.rooms > 1 ? 's' : ''}${data.isCouple ? ' · Casal' : ''} · ${data.selectedSpots.length} atividades.`,
