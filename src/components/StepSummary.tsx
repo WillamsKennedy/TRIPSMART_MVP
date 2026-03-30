@@ -57,10 +57,12 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const handleShare = async () => {
     if (!user) return;
     setSharing(true);
-    const { error } = await supabase.from('shared_itineraries' as any).insert({
+
+    // Save to community
+    const { error: shareError } = await supabase.from('shared_itineraries' as any).insert({
       user_id: user.id,
       title: `${data.days} dias em ${data.cityName}`,
-      description: `Roteiro de ${data.days} dias em ${data.cityName}, PE com ${data.selectedSpots.length} atividades.`,
+      description: `Roteiro de ${data.days} dias em ${data.cityName}, PE · ${data.adults} adulto${data.adults > 1 ? 's' : ''}${data.children > 0 ? ` + ${data.children} criança${data.children > 1 ? 's' : ''}` : ''} · ${data.rooms} quarto${data.rooms > 1 ? 's' : ''}${data.isCouple ? ' · Casal' : ''} · ${data.selectedSpots.length} atividades.`,
       budget: data.budget,
       budget_label: data.budgetLabel,
       people: data.people,
@@ -75,12 +77,33 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       local_transport: data.localTransport,
       itinerary_data: itineraryData,
     } as any);
+
+    // Also save to history if not already saved
+    if (!saved) {
+      await supabase.from('travel_history').insert({
+        user_id: user.id,
+        budget: data.budget,
+        people: data.people,
+        group_type: data.groupType,
+        country: 'Brasil',
+        state: `${data.cityName}, PE`,
+        entertainment: data.selectedSpots.map(s => s.name),
+        food: [],
+        accommodation: data.accommodation?.name || null,
+        month: data.month,
+        transport_to_destination: data.transportToDestination,
+        tourist_spots: data.selectedSpots as any,
+        local_transport: data.localTransport,
+      });
+      setSaved(true);
+    }
+
     setSharing(false);
-    if (error) {
-      toast({ title: 'Erro ao compartilhar', description: error.message, variant: 'destructive' });
+    if (shareError) {
+      toast({ title: 'Erro ao compartilhar', description: shareError.message, variant: 'destructive' });
     } else {
       setShared(true);
-      toast({ title: 'Roteiro compartilhado! 🎉', description: 'Outros viajantes podem ver seu roteiro.' });
+      toast({ title: 'Roteiro compartilhado e salvo! 🎉', description: 'Visível na comunidade e no seu histórico.' });
     }
   };
 
@@ -95,6 +118,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
             budget: data.budget,
             budgetLabel: data.budgetLabel,
             people: data.people,
+            adults: data.adults,
+            children: data.children,
+            isCouple: data.isCouple,
+            rooms: data.rooms,
             days: data.days,
             month: data.month,
             transportToDestination: data.transportToDestination,
@@ -153,9 +180,13 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       {/* Summary Card */}
       <div className="w-full p-6 rounded-2xl border border-border bg-card space-y-4" style={{ boxShadow: 'var(--card-shadow)' }}>
         <SummaryRow label="Orçamento" value={data.budgetLabel} />
-        <SummaryRow label="Passageiros" value={`${data.people} pessoa${data.people > 1 ? 's' : ''}`} />
+        <SummaryRow label="Adultos" value={`${data.adults}`} />
+        {data.children > 0 && <SummaryRow label="Crianças" value={`${data.children}`} />}
+        <SummaryRow label="Total passageiros" value={`${data.people} pessoa${data.people > 1 ? 's' : ''}`} />
+        {data.isCouple && <SummaryRow label="Tipo" value="💕 Casal" />}
+        {data.people > 1 && !data.isCouple && <SummaryRow label="Tipo" value={data.groupType === 'couple' ? 'Casal' : 'Amigos'} />}
+        <SummaryRow label="Quartos" value={`${data.rooms}`} />
         <SummaryRow label="Duração" value={`${data.days} dia${data.days > 1 ? 's' : ''}`} />
-        {data.people > 1 && <SummaryRow label="Tipo" value={data.groupType === 'couple' ? 'Casal' : 'Amigos'} />}
         {data.month && <SummaryRow label="Mês" value={monthNames[data.month - 1]} />}
         {data.transportToDestination && <SummaryRow label="Transporte ida" value={transportLabel || ''} />}
         <SummaryRow label="Destino" value={`${data.cityName}, Pernambuco`} />
@@ -258,7 +289,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
-        {!saved && (
+        {!saved && !shared && (
           <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2">
             <Save size={16} /> {saving ? 'Salvando...' : 'Salvar no histórico'}
           </Button>
@@ -267,6 +298,11 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           <Button onClick={handleShare} disabled={sharing} variant="outline" className="flex-1 rounded-full font-bold gap-2">
             <Share2 size={16} /> {sharing ? 'Compartilhando...' : 'Compartilhar roteiro'}
           </Button>
+        )}
+        {(saved || shared) && (
+          <p className="text-sm text-center text-muted-foreground w-full">
+            ✅ {shared ? 'Compartilhado na comunidade e salvo no histórico' : 'Salvo no histórico'}
+          </p>
         )}
         <Button variant="outline" size="lg" onClick={onRestart} className="flex-1 rounded-full gap-2">
           <RotateCcw size={16} /> Nova viagem

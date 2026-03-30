@@ -18,7 +18,7 @@ import type { TravelState, TouristSpot, AccommodationDetail } from "@/types/trav
 type StepName = 'budget' | 'group' | 'month' | 'transport-arrival' | 'city' | 'accommodation' | 'local-transport' | 'summary';
 
 const initialState: TravelState = {
-  budget: 0, budgetLabel: '', people: 1, days: 3, groupType: "solo",
+  budget: 0, budgetLabel: '', people: 1, adults: 1, children: 0, isCouple: false, rooms: 1, days: 3, groupType: "solo",
   month: null, transportToDestination: null, city: "", cityName: "",
   selectedSpots: [], accommodation: null, localTransport: null,
 };
@@ -36,16 +36,23 @@ const Planner = () => {
 
   const getSteps = (): StepName[] => {
     const steps: StepName[] = ['budget'];
-    if (data.people > 1) steps.push('group');
+    if (data.people > 1 && !data.isCouple) steps.push('group');
     steps.push('month', 'transport-arrival', 'city', 'accommodation', 'local-transport', 'summary');
     return steps;
   };
 
   const goBack = () => { const s = getSteps(); const i = s.indexOf(step); if (i > 0) setStep(s[i - 1]); };
 
-  const handleBudget = (budget: number, budgetLabel: string, people: number, days: number) => {
-    setData(d => ({ ...d, budget, budgetLabel, people, days, groupType: people === 1 ? "solo" : d.groupType }));
-    setStep(people > 1 ? 'group' : 'month');
+  const handleBudget = (budget: number, budgetLabel: string, people: number, days: number, adults: number, children: number, isCouple: boolean, rooms: number) => {
+    const groupType = people === 1 ? "solo" : isCouple ? "couple" : data.groupType === "solo" ? "friends" : data.groupType;
+    setData(d => ({ ...d, budget, budgetLabel, people, days, adults, children, isCouple, rooms, groupType }));
+    if (isCouple) {
+      setStep('month');
+    } else if (people > 1) {
+      setStep('group');
+    } else {
+      setStep('month');
+    }
   };
   const handleGroupType = (type: "couple" | "friends") => { setData(d => ({ ...d, groupType: type })); setStep('month'); };
   const handleMonth = (month: number) => { setData(d => ({ ...d, month })); setStep('transport-arrival'); };
@@ -67,10 +74,10 @@ const Planner = () => {
           <Button variant="ghost" size="sm" onClick={() => step === 'budget' ? navigate('/') : goBack()} className="gap-2">
             <ArrowLeft size={16} /> {step === 'budget' ? 'Voltar' : 'Anterior'}
           </Button>
-          <div className="flex items-center gap-2">
+          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <Navigation size={16} className="text-primary" />
             <span className="font-black text-sm"><span className="text-primary">TRIP</span><span className="text-accent">SMART</span></span>
-          </div>
+          </button>
           {data.budget > 0 && (
             <div className="hidden sm:block w-48">
               <BudgetBar total={data.budget} spent={0} />
