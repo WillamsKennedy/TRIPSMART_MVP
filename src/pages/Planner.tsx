@@ -41,15 +41,10 @@ const Planner = () => {
   const goBack = () => { const s = getSteps(); const i = s.indexOf(step); if (i > 0) setStep(s[i - 1]); };
 
   const handleBudget = (budget: number, budgetLabel: string, people: number, days: number, adults: number, children: number, isCouple: boolean, rooms: number) => {
-    const groupType = people === 1 ? "solo" : isCouple ? "couple" : data.groupType === "solo" ? "friends" : data.groupType;
+    const groupType = people === 1 ? "solo" : isCouple ? "couple" : "friends";
     setData(d => ({ ...d, budget, budgetLabel, people, days, adults, children, isCouple, rooms, groupType }));
-    if (isCouple || people <= 1) {
-      setStep('month');
-    } else {
-      setStep('group');
-    }
+    setStep('month');
   };
-  const handleGroupType = (type: "couple" | "friends") => { setData(d => ({ ...d, groupType: type })); setStep('month'); };
   const handleMonth = (month: number) => { setData(d => ({ ...d, month })); setStep('transport-arrival'); };
   const handleTransportArrival = (transport: string) => { setData(d => ({ ...d, transportToDestination: transport })); setStep('city'); };
   const handleCity = (cityId: string, cityName: string, spots: TouristSpot[]) => { setData(d => ({ ...d, city: cityId, cityName, selectedSpots: spots })); setStep('accommodation'); };
