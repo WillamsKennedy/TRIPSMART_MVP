@@ -24,20 +24,22 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const [loadingItinerary, setLoadingItinerary] = useState(false);
   const [itineraryData, setItineraryData] = useState<any[] | null>(null);
 
-  const transportLabel = transportOptions.find(t => t.id === data.transportToDestination)?.label || data.transportToDestination;
-  const localTransportLabel = localTransportOptions.find(t => t.id === data.localTransport)?.label || data.localTransport;
+  const transportLabel =
+    transportOptions.find((t) => t.id === data.transportToDestination)?.label || data.transportToDestination;
+  const localTransportLabel =
+    localTransportOptions.find((t) => t.id === data.localTransport)?.label || data.localTransport;
 
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from('travel_history').insert({
+    const { error } = await supabase.from("travel_history").insert({
       user_id: user.id,
       budget: data.budget,
       people: data.people,
       group_type: data.groupType,
-      country: 'Brasil',
+      country: "Brasil",
       state: `${data.cityName}, PE`,
-      entertainment: data.selectedSpots.map(s => s.name),
+      entertainment: data.selectedSpots.map((s) => s.name),
       food: [],
       accommodation: data.accommodation?.name || null,
       month: data.month,
@@ -47,10 +49,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     });
     setSaving(false);
     if (error) {
-      toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' });
+      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
     } else {
       setSaved(true);
-      toast({ title: 'Viagem salva!', description: 'Acesse seu histórico para ver.' });
+      toast({ title: "Viagem salva!", description: "Acesse seu histórico para ver." });
     }
   };
 
@@ -59,10 +61,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     setSharing(true);
 
     // Save to community
-    const { error: shareError } = await supabase.from('shared_itineraries').insert({
+    const { error: shareError } = await supabase.from("shared_itineraries").insert({
       user_id: user.id,
       title: `${data.days} dias em ${data.cityName}`,
-      description: `Roteiro de ${data.days} dias em ${data.cityName}, PE · ${data.adults} adulto${data.adults > 1 ? 's' : ''}${data.children > 0 ? ` + ${data.children} criança${data.children > 1 ? 's' : ''}` : ''} · ${data.rooms} quarto${data.rooms > 1 ? 's' : ''}${data.isCouple ? ' · Casal' : ''} · ${data.selectedSpots.length} atividades.`,
+      description: `Roteiro de ${data.days} dias em ${data.cityName}, PE · ${data.adults} adulto${data.adults > 1 ? "s" : ""}${data.children > 0 ? ` + ${data.children} criança${data.children > 1 ? "s" : ""}` : ""} · ${data.rooms} quarto${data.rooms > 1 ? "s" : ""}${data.isCouple ? " · Casal" : ""} · ${data.selectedSpots.length} atividades.`,
       budget: data.budget,
       budget_label: data.budgetLabel,
       people: data.people,
@@ -80,14 +82,14 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
     // Also save to history if not already saved
     if (!saved) {
-      await supabase.from('travel_history').insert({
+      await supabase.from("travel_history").insert({
         user_id: user.id,
         budget: data.budget,
         people: data.people,
         group_type: data.groupType,
-        country: 'Brasil',
+        country: "Brasil",
         state: `${data.cityName}, PE`,
-        entertainment: data.selectedSpots.map(s => s.name),
+        entertainment: data.selectedSpots.map((s) => s.name),
         food: [],
         accommodation: data.accommodation?.name || null,
         month: data.month,
@@ -100,10 +102,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
     setSharing(false);
     if (shareError) {
-      toast({ title: 'Erro ao compartilhar', description: shareError.message, variant: 'destructive' });
+      toast({ title: "Erro ao compartilhar", description: shareError.message, variant: "destructive" });
     } else {
       setShared(true);
-      toast({ title: 'Roteiro compartilhado e salvo! 🎉', description: 'Visível na comunidade e no seu histórico.' });
+      toast({ title: "Roteiro compartilhado e salvo! 🎉", description: "Visível na comunidade e no seu histórico." });
     }
   };
 
@@ -111,9 +113,9 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     if (!user) return;
     setLoadingItinerary(true);
     try {
-      const { data: result, error } = await supabase.functions.invoke('n8n-webhook', {
+      const { data: result, error } = await supabase.functions.invoke("n8n-webhook", {
         body: {
-          action: 'generate-itinerary',
+          action: "generate-itinerary",
           params: {
             budget: data.budget,
             budgetLabel: data.budgetLabel,
@@ -126,8 +128,15 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
             month: data.month,
             transportToDestination: data.transportToDestination,
             city: data.cityName,
-            selectedSpots: data.selectedSpots.map(s => ({ name: s.name, category: s.category, lat: s.lat, lng: s.lng })),
-            accommodation: data.accommodation ? { name: data.accommodation.name, lat: data.accommodation.lat, lng: data.accommodation.lng } : null,
+            selectedSpots: data.selectedSpots.map((s) => ({
+              name: s.name,
+              category: s.category,
+              lat: s.lat,
+              lng: s.lng,
+            })),
+            accommodation: data.accommodation
+              ? { name: data.accommodation.name, lat: data.accommodation.lat, lng: data.accommodation.lng }
+              : null,
             localTransport: data.localTransport,
           },
         },
@@ -135,12 +144,16 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       if (error) throw error;
       if (result?.data) {
         setItineraryData(result.data);
-        toast({ title: 'Roteiro gerado! 🤖' });
+        toast({ title: "Roteiro gerado! 🤖" });
       } else {
-        toast({ title: 'n8n retornou sem dados', description: 'Configure o webhook generate-itinerary no n8n.', variant: 'destructive' });
+        toast({
+          title: "Erro: Não foi possivel formular o roteiro",
+          description: "Configure o webhook generate-itinerary no n8n.",
+          variant: "destructive",
+        });
       }
     } catch (e: any) {
-      toast({ title: 'Erro ao gerar roteiro', description: e.message, variant: 'destructive' });
+      toast({ title: "Erro ao gerar roteiro", description: e.message, variant: "destructive" });
     }
     setLoadingItinerary(false);
   };
@@ -148,11 +161,11 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const generateMapsUrl = () => {
     const points: string[] = [];
     if (data.accommodation) points.push(`${data.accommodation.lat},${data.accommodation.lng}`);
-    data.selectedSpots.forEach(s => points.push(`${s.lat},${s.lng}`));
-    if (points.length < 2) return '#';
+    data.selectedSpots.forEach((s) => points.push(`${s.lat},${s.lng}`));
+    if (points.length < 2) return "#";
     const origin = points[0];
     const dest = points[points.length - 1];
-    const waypoints = points.slice(1, -1).join('|');
+    const waypoints = points.slice(1, -1).join("|");
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&waypoints=${waypoints}&travelmode=walking`;
   };
 
@@ -169,33 +182,38 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       </div>
 
       <div className="text-center space-y-2">
-        <h2 className="text-3xl md:text-4xl font-extrabold tracking-display text-foreground">
-          Roteiro pronto! 🎉
-        </h2>
+        <h2 className="text-3xl md:text-4xl font-extrabold tracking-display text-foreground">Roteiro pronto! 🎉</h2>
         <p className="text-muted-foreground text-lg">
-          {data.days} dia{data.days > 1 ? 's' : ''} em {data.cityName}, PE
+          {data.days} dia{data.days > 1 ? "s" : ""} em {data.cityName}, PE
         </p>
       </div>
 
       {/* Summary Card */}
-      <div className="w-full p-6 rounded-2xl border border-border bg-card space-y-4" style={{ boxShadow: 'var(--card-shadow)' }}>
+      <div
+        className="w-full p-6 rounded-2xl border border-border bg-card space-y-4"
+        style={{ boxShadow: "var(--card-shadow)" }}
+      >
         <SummaryRow label="Orçamento" value={data.budgetLabel} />
         <SummaryRow label="Adultos" value={`${data.adults}`} />
         {data.children > 0 && <SummaryRow label="Crianças" value={`${data.children}`} />}
-        <SummaryRow label="Total passageiros" value={`${data.people} pessoa${data.people > 1 ? 's' : ''}`} />
+        <SummaryRow label="Total passageiros" value={`${data.people} pessoa${data.people > 1 ? "s" : ""}`} />
         {data.isCouple && <SummaryRow label="Tipo" value="💕 Casal" />}
-        {data.people > 1 && !data.isCouple && <SummaryRow label="Tipo" value={data.groupType === 'couple' ? 'Casal' : 'Amigos'} />}
+        {data.people > 1 && !data.isCouple && (
+          <SummaryRow label="Tipo" value={data.groupType === "couple" ? "Casal" : "Amigos"} />
+        )}
         <SummaryRow label="Quartos" value={`${data.rooms}`} />
-        <SummaryRow label="Duração" value={`${data.days} dia${data.days > 1 ? 's' : ''}`} />
+        <SummaryRow label="Duração" value={`${data.days} dia${data.days > 1 ? "s" : ""}`} />
         {data.month && <SummaryRow label="Mês" value={monthNames[data.month - 1]} />}
-        {data.transportToDestination && <SummaryRow label="Transporte ida" value={transportLabel || ''} />}
+        {data.transportToDestination && <SummaryRow label="Transporte ida" value={transportLabel || ""} />}
         <SummaryRow label="Destino" value={`${data.cityName}, Pernambuco`} />
 
         {data.selectedSpots.length > 0 && (
           <div className="pt-2 border-t border-border">
-            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Atividades Selecionadas</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Atividades Selecionadas
+            </span>
             <div className="flex flex-wrap gap-2 mt-2">
-              {data.selectedSpots.map(s => (
+              {data.selectedSpots.map((s) => (
                 <span key={s.id} className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary">
                   {s.imageEmoji} {s.name}
                 </span>
@@ -211,14 +229,14 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
               <span className="font-bold text-foreground">{data.accommodation.name}</span>
               <span className="text-sm text-muted-foreground block">{data.accommodation.address}</span>
               <span className="text-sm text-primary font-semibold">
-                ⭐ {data.accommodation.rating} · R$ {data.accommodation.pricePerNight}/noite ·
-                Total: R$ {(data.accommodation.pricePerNight * data.days).toLocaleString('pt-BR')}
+                ⭐ {data.accommodation.rating} · R$ {data.accommodation.pricePerNight}/noite · Total: R${" "}
+                {(data.accommodation.pricePerNight * data.days).toLocaleString("pt-BR")}
               </span>
             </div>
           </div>
         )}
 
-        {data.localTransport && <SummaryRow label="Transporte local" value={localTransportLabel || ''} />}
+        {data.localTransport && <SummaryRow label="Transporte local" value={localTransportLabel || ""} />}
       </div>
 
       {/* Map */}
@@ -227,15 +245,17 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           <Map size={20} className="text-primary" />
           <span className="font-bold text-foreground">Mapa do roteiro</span>
         </div>
-        <TravelMap
-          spots={data.selectedSpots}
-          accommodation={data.accommodation}
-          restaurants={[]}
-        />
+        <TravelMap spots={data.selectedSpots} accommodation={data.accommodation} restaurants={[]} />
         <div className="flex flex-wrap items-center gap-3">
-          <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: '#FF6B35' }} /> Hospedagem</span>
-          <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: '#00B4D8' }} /> Atividades</span>
-          <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: '#E91E63' }} /> Restaurantes</span>
+          <span className="flex items-center gap-1 text-xs">
+            <span className="w-3 h-3 rounded-full" style={{ background: "#FF6B35" }} /> Hospedagem
+          </span>
+          <span className="flex items-center gap-1 text-xs">
+            <span className="w-3 h-3 rounded-full" style={{ background: "#00B4D8" }} /> Atividades
+          </span>
+          <span className="flex items-center gap-1 text-xs">
+            <span className="w-3 h-3 rounded-full" style={{ background: "#E91E63" }} /> Restaurantes
+          </span>
         </div>
       </div>
 
@@ -259,7 +279,9 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           <div className="space-y-4">
             {itineraryData.map((day: any, i: number) => (
               <div key={i} className="p-3 rounded-xl bg-card border border-border">
-                <h4 className="font-bold text-foreground">Dia {day.day}: {day.title}</h4>
+                <h4 className="font-bold text-foreground">
+                  Dia {day.day}: {day.title}
+                </h4>
                 <div className="mt-2 space-y-1">
                   {day.activities?.map((act: any, j: number) => (
                     <p key={j} className="text-sm text-muted-foreground">
@@ -273,15 +295,13 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           </div>
         ) : (
           <>
-            <p className="text-sm text-primary font-semibold">
-              🤖 Gere o roteiro personalizado pela IA
-            </p>
+            <p className="text-sm text-primary font-semibold">🤖 Gere o roteiro personalizado pela IA</p>
             <Button
               onClick={generateItinerary}
               disabled={loadingItinerary}
               className="mt-3 gradient-pe border-0 rounded-full font-bold gap-2"
             >
-              <CalendarDays size={16} /> {loadingItinerary ? 'Gerando roteiro...' : 'Gerar roteiro com IA'}
+              <CalendarDays size={16} /> {loadingItinerary ? "Gerando roteiro..." : "Gerar roteiro com IA"}
             </Button>
           </>
         )}
@@ -290,18 +310,27 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
         {!saved && !shared && (
-          <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2">
-            <Save size={16} /> {saving ? 'Salvando...' : 'Salvar no histórico'}
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2"
+          >
+            <Save size={16} /> {saving ? "Salvando..." : "Salvar no histórico"}
           </Button>
         )}
         {!shared && (
-          <Button onClick={handleShare} disabled={sharing} variant="outline" className="flex-1 rounded-full font-bold gap-2">
-            <Share2 size={16} /> {sharing ? 'Compartilhando...' : 'Compartilhar roteiro'}
+          <Button
+            onClick={handleShare}
+            disabled={sharing}
+            variant="outline"
+            className="flex-1 rounded-full font-bold gap-2"
+          >
+            <Share2 size={16} /> {sharing ? "Compartilhando..." : "Compartilhar roteiro"}
           </Button>
         )}
         {(saved || shared) && (
           <p className="text-sm text-center text-muted-foreground w-full">
-            ✅ {shared ? 'Compartilhado na comunidade e salvo no histórico' : 'Salvo no histórico'}
+            ✅ {shared ? "Compartilhado na comunidade e salvo no histórico" : "Salvo no histórico"}
           </p>
         )}
         <Button variant="outline" size="lg" onClick={onRestart} className="flex-1 rounded-full gap-2">
