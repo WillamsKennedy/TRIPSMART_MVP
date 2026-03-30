@@ -58,15 +58,17 @@ const Planner = () => {
   if (loading) return null;
 
   return (
-    <div className="min-h-screen bg-background bg-hero-pattern flex flex-col">
-      <div className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border px-6 py-3">
+    <div className="min-h-screen bg-background flex flex-col">
+      <div className="sticky top-0 z-50 bg-pe-navy border-b border-pe-blue/20 px-6 py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => step === 'budget' ? navigate('/') : goBack()} className="gap-2">
+          <Button variant="ghost" size="sm" onClick={() => step === 'budget' ? navigate('/') : goBack()} className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
             <ArrowLeft size={16} /> {step === 'budget' ? 'Voltar' : 'Anterior'}
           </Button>
           <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <Navigation size={16} className="text-primary" />
-            <span className="font-black text-sm"><span className="text-primary">TRIP</span><span className="text-accent">SMART</span></span>
+            <div className="w-8 h-8 rounded-lg bg-pe-gold flex items-center justify-center">
+              <Navigation size={14} className="text-pe-navy" />
+            </div>
+            <span className="font-black text-sm text-white">TRIP<span className="text-pe-gold">SMART</span></span>
           </button>
           {data.budget > 0 && (
             <div className="hidden sm:block w-48">
