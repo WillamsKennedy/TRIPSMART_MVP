@@ -1,20 +1,24 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Users, Minus, Plus, Calendar, Check } from "lucide-react";
+import { Users, Minus, Plus, Calendar, Check, Heart, Baby, BedDouble } from "lucide-react";
 import { budgetRanges } from "@/data/mockData";
 
 interface StepBudgetProps {
-  onNext: (budget: number, budgetLabel: string, people: number, days: number) => void;
+  onNext: (budget: number, budgetLabel: string, people: number, days: number, adults: number, children: number, isCouple: boolean, rooms: number) => void;
 }
 
 const StepBudget = ({ onNext }: StepBudgetProps) => {
   const [selectedBudget, setSelectedBudget] = useState<string | null>(null);
-  const [people, setPeople] = useState(1);
+  const [adults, setAdults] = useState(1);
+  const [children, setChildren] = useState(0);
+  const [isCouple, setIsCouple] = useState(false);
+  const [rooms, setRooms] = useState(1);
   const [days, setDays] = useState(3);
 
+  const people = adults + children;
   const budgetData = budgetRanges.find(b => b.id === selectedBudget);
-  const canProceed = selectedBudget && people >= 1 && days >= 1;
+  const canProceed = selectedBudget && adults >= 1 && days >= 1;
 
   return (
     <motion.div
@@ -67,56 +71,106 @@ const StepBudget = ({ onNext }: StepBudgetProps) => {
         ))}
       </div>
 
-      {/* People + Days */}
-      <div className="flex flex-col sm:flex-row gap-8 items-center">
-        <div className="flex flex-col items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Passageiros</span>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setPeople(Math.max(1, people - 1))}
-              className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary"
-            >
-              <Minus size={18} />
-            </button>
-            <div className="flex items-center gap-2">
-              <Users size={18} className="text-primary" />
-              <span className="text-2xl font-extrabold tabular-nums text-foreground">{people}</span>
+      {/* Passengers: Adults, Children, Couple, Rooms */}
+      <div className="w-full max-w-lg space-y-6">
+        <div className="grid grid-cols-2 gap-6">
+          {/* Adults */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Adultos</span>
+            <div className="flex items-center gap-4">
+              <button onClick={() => setAdults(Math.max(1, adults - 1))} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary">
+                <Minus size={18} />
+              </button>
+              <div className="flex items-center gap-2">
+                <Users size={18} className="text-primary" />
+                <span className="text-2xl font-extrabold tabular-nums text-foreground">{adults}</span>
+              </div>
+              <button onClick={() => setAdults(adults + 1)} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary">
+                <Plus size={18} />
+              </button>
             </div>
-            <button
-              onClick={() => setPeople(people + 1)}
-              className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary"
-            >
-              <Plus size={18} />
-            </button>
+          </div>
+
+          {/* Children */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Crianças</span>
+            <div className="flex items-center gap-4">
+              <button onClick={() => setChildren(Math.max(0, children - 1))} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary">
+                <Minus size={18} />
+              </button>
+              <div className="flex items-center gap-2">
+                <Baby size={18} className="text-primary" />
+                <span className="text-2xl font-extrabold tabular-nums text-foreground">{children}</span>
+              </div>
+              <button onClick={() => setChildren(children + 1)} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary">
+                <Plus size={18} />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="flex flex-col items-center gap-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Dias de viagem</span>
-          <div className="flex items-center gap-4">
+        {/* Couple toggle */}
+        {adults >= 2 && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex items-center justify-center">
             <button
-              onClick={() => setDays(Math.max(1, days - 1))}
-              className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary"
+              onClick={() => setIsCouple(!isCouple)}
+              className={`flex items-center gap-3 px-6 py-3 rounded-full border transition-all ${
+                isCouple ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-card text-muted-foreground hover:border-primary/30'
+              }`}
             >
-              <Minus size={18} />
+              <Heart size={18} className={isCouple ? 'fill-primary' : ''} />
+              <span className="font-bold text-sm">Viagem de casal</span>
+              {isCouple && <Check size={16} />}
             </button>
-            <div className="flex items-center gap-2">
-              <Calendar size={18} className="text-primary" />
-              <span className="text-2xl font-extrabold tabular-nums text-foreground">{days}</span>
+          </motion.div>
+        )}
+
+        <div className="grid grid-cols-2 gap-6">
+          {/* Rooms */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Quartos</span>
+            <div className="flex items-center gap-4">
+              <button onClick={() => setRooms(Math.max(1, rooms - 1))} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary">
+                <Minus size={18} />
+              </button>
+              <div className="flex items-center gap-2">
+                <BedDouble size={18} className="text-primary" />
+                <span className="text-2xl font-extrabold tabular-nums text-foreground">{rooms}</span>
+              </div>
+              <button onClick={() => setRooms(rooms + 1)} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary">
+                <Plus size={18} />
+              </button>
             </div>
-            <button
-              onClick={() => setDays(days + 1)}
-              className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary"
-            >
-              <Plus size={18} />
-            </button>
           </div>
+
+          {/* Days */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Dias de viagem</span>
+            <div className="flex items-center gap-4">
+              <button onClick={() => setDays(Math.max(1, days - 1))} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary">
+                <Minus size={18} />
+              </button>
+              <div className="flex items-center gap-2">
+                <Calendar size={18} className="text-primary" />
+                <span className="text-2xl font-extrabold tabular-nums text-foreground">{days}</span>
+              </div>
+              <button onClick={() => setDays(days + 1)} className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors text-primary">
+                <Plus size={18} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Summary line */}
+        <div className="text-center text-sm text-muted-foreground">
+          <span className="font-semibold text-foreground">{people}</span> passageiro{people > 1 ? 's' : ''} ({adults} adulto{adults > 1 ? 's' : ''}{children > 0 ? `, ${children} criança${children > 1 ? 's' : ''}` : ''}) · <span className="font-semibold text-foreground">{rooms}</span> quarto{rooms > 1 ? 's' : ''} · <span className="font-semibold text-foreground">{days}</span> dia{days > 1 ? 's' : ''}
+          {isCouple && <span className="text-primary font-semibold"> · 💕 Casal</span>}
         </div>
       </div>
 
       <Button
         disabled={!canProceed}
-        onClick={() => budgetData && onNext(budgetData.max, budgetData.label, people, days)}
+        onClick={() => budgetData && onNext(budgetData.max, budgetData.label, people, days, adults, children, isCouple, rooms)}
         className="w-full max-w-xs h-14 rounded-full text-lg font-bold gradient-pe border-0 shadow-lg"
       >
         Continuar

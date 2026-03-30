@@ -50,6 +50,10 @@ export interface TravelState {
   budget: number;
   budgetLabel: string;
   people: number;
+  adults: number;
+  children: number;
+  isCouple: boolean;
+  rooms: number;
   days: number;
   groupType: 'solo' | 'couple' | 'friends';
   month: number | null;
