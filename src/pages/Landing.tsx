@@ -86,6 +86,9 @@ const Landing = () => {
                 <Button variant="ghost" size="sm" onClick={() => navigate("/comunidade")} className="gap-1.5 text-xs font-bold">
                   <Users size={14} /> Comunidade
                 </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/perfil")} className="gap-1.5 text-xs font-bold">
+                  <User size={14} /> Perfil
+                </Button>
                 <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5 text-xs font-bold">
                   <LogOut size={14} /> Sair
                 </Button>
