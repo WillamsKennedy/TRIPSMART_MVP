@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import BudgetBar from "@/components/BudgetBar";
 import StepBudget from "@/components/StepBudget";
-import StepGroupType from "@/components/StepGroupType";
+
 import StepMonth from "@/components/StepMonth";
 import StepTransportArrival from "@/components/StepTransportArrival";
 import StepCity from "@/components/StepCity";
