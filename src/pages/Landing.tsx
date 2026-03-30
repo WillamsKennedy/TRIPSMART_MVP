@@ -79,6 +79,7 @@ const Landing = () => {
             </span>
           </button>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             {user ? (
               <>
                 <Button variant="ghost" size="sm" onClick={() => navigate("/historico")} className="gap-1.5 text-xs font-bold">

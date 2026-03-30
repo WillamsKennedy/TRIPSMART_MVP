@@ -91,9 +91,12 @@ const TravelHistory = () => {
               <span className="text-primary">TRIP</span><span className="text-accent">SMART</span>
             </span>
           </button>
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-1.5 text-xs font-bold">
-            <ArrowLeft size={14} /> Início
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-1.5 text-xs font-bold">
+              <ArrowLeft size={14} /> Início
+            </Button>
+          </div>
         </div>
       </nav>
 
