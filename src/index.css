@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Satisfy&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,92 +6,113 @@
 
 @layer base {
   :root {
-    --background: 210 30% 97%;
-    --foreground: 220 40% 12%;
+    /* Pernambuco: Azul profundo, Vermelho vibrante, Dourado quente */
+    --background: 220 25% 96%;
+    --foreground: 222 47% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 40% 12%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 40% 12%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 220 85% 45%;
+    --primary: 217 91% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 45 95% 50%;
-    --secondary-foreground: 220 40% 12%;
+    --secondary: 42 100% 50%;
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 215 20% 70%;
-    --muted-foreground: 215 20% 45%;
+    --muted: 220 14% 90%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 0 78% 50%;
+    --accent: 355 85% 52%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 25% 88%;
-    --input: 215 25% 88%;
-    --ring: 220 85% 45%;
+    --border: 220 13% 87%;
+    --input: 220 13% 87%;
+    --ring: 217 91% 40%;
 
-    --radius: 1rem;
+    --radius: 0.875rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 220 85% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 30% 95%;
-    --sidebar-accent-foreground: 220 40% 12%;
-    --sidebar-border: 215 20% 91%;
-    --sidebar-ring: 220 85% 45%;
+    --sidebar-background: 217 91% 18%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 42 100% 50%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217 91% 25%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 217 80% 28%;
+    --sidebar-ring: 42 100% 50%;
 
-    --brand-bezier: cubic-bezier(0.16, 1, 0.3, 1);
-    --card-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 12px 24px -8px rgba(0,0,0,0.08);
+    /* Semantic PE colors */
+    --pe-blue: 217 91% 40%;
+    --pe-red: 355 85% 52%;
+    --pe-gold: 42 100% 50%;
+    --pe-navy: 217 91% 18%;
+    --pe-cream: 40 60% 96%;
+    --pe-blue-light: 217 80% 94%;
+    --pe-red-light: 355 80% 95%;
+    --pe-gold-light: 42 90% 93%;
 
-    --pe-blue: 220 85% 45%;
-    --pe-red: 0 78% 50%;
-    --pe-gold: 45 95% 50%;
-    --pe-white: 0 0% 100%;
-    --demand-high: 0 78% 50%;
-    --demand-moderate: 45 95% 50%;
+    --demand-high: 355 85% 52%;
+    --demand-moderate: 42 100% 50%;
     --demand-low: 160 84% 39%;
+
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px -8px rgba(0,0,0,0.1);
+    --brand-bezier: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .dark {
-    --background: 220 35% 8%;
-    --foreground: 210 30% 95%;
-    --card: 220 35% 12%;
-    --card-foreground: 210 30% 95%;
-    --popover: 220 35% 12%;
-    --popover-foreground: 210 30% 95%;
-    --primary: 220 80% 55%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 45 90% 50%;
-    --secondary-foreground: 220 40% 12%;
-    --muted: 215 20% 35%;
-    --muted-foreground: 215 20% 60%;
-    --accent: 0 75% 55%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 30% 95%;
-    --border: 220 25% 20%;
-    --input: 220 25% 20%;
-    --ring: 220 80% 55%;
-    --sidebar-background: 220 35% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 220 80% 55%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 18%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 220 25% 18%;
-    --sidebar-ring: 220 80% 55%;
+    --background: 222 47% 7%;
+    --foreground: 220 20% 93%;
 
-    --pe-blue: 220 80% 55%;
-    --pe-red: 0 75% 55%;
-    --pe-gold: 45 90% 50%;
-    --pe-white: 0 0% 100%;
-    --demand-high: 0 78% 55%;
-    --demand-moderate: 45 90% 50%;
+    --card: 222 40% 12%;
+    --card-foreground: 220 20% 93%;
+
+    --popover: 222 40% 12%;
+    --popover-foreground: 220 20% 93%;
+
+    --primary: 217 85% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 42 95% 55%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 222 30% 22%;
+    --muted-foreground: 220 15% 55%;
+
+    --accent: 355 80% 58%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 220 20% 93%;
+
+    --border: 222 30% 20%;
+    --input: 222 30% 20%;
+    --ring: 217 85% 55%;
+
+    --sidebar-background: 222 47% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 42 95% 55%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 222 30% 16%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 222 30% 18%;
+    --sidebar-ring: 42 95% 55%;
+
+    --pe-blue: 217 85% 55%;
+    --pe-red: 355 80% 58%;
+    --pe-gold: 42 95% 55%;
+    --pe-navy: 222 47% 14%;
+    --pe-cream: 222 30% 16%;
+    --pe-blue-light: 217 50% 18%;
+    --pe-red-light: 355 40% 16%;
+    --pe-gold-light: 42 40% 16%;
+
+    --demand-high: 355 80% 58%;
+    --demand-moderate: 42 95% 55%;
     --demand-low: 160 84% 39%;
   }
 }
@@ -102,7 +123,10 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
 }
 
@@ -111,27 +135,61 @@
     font-variant-numeric: tabular-nums;
   }
   .tracking-display {
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
   }
-  .font-script {
-    font-family: 'Satisfy', cursive;
-  }
+
+  /* Solid color utilities using semantic tokens */
+  .bg-pe-blue { background-color: hsl(var(--pe-blue)); }
+  .bg-pe-red { background-color: hsl(var(--pe-red)); }
+  .bg-pe-gold { background-color: hsl(var(--pe-gold)); }
+  .bg-pe-navy { background-color: hsl(var(--pe-navy)); }
+  .bg-pe-cream { background-color: hsl(var(--pe-cream)); }
+  .bg-pe-blue-light { background-color: hsl(var(--pe-blue-light)); }
+  .bg-pe-red-light { background-color: hsl(var(--pe-red-light)); }
+  .bg-pe-gold-light { background-color: hsl(var(--pe-gold-light)); }
+
+  .text-pe-blue { color: hsl(var(--pe-blue)); }
+  .text-pe-red { color: hsl(var(--pe-red)); }
+  .text-pe-gold { color: hsl(var(--pe-gold)); }
+  .text-pe-navy { color: hsl(var(--pe-navy)); }
+
+  .border-pe-blue { border-color: hsl(var(--pe-blue)); }
+  .border-pe-red { border-color: hsl(var(--pe-red)); }
+  .border-pe-gold { border-color: hsl(var(--pe-gold)); }
+
   .gradient-pe {
-    background: linear-gradient(135deg, hsl(220, 85%, 45%), hsl(0, 78%, 50%), hsl(45, 95%, 50%));
+    background: linear-gradient(135deg, hsl(var(--pe-blue)), hsl(var(--pe-red)));
+  }
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--pe-gold)), hsl(42 90% 42%));
   }
   .gradient-text {
-    background: linear-gradient(135deg, hsl(220, 85%, 45%), hsl(0, 78%, 50%));
+    background: linear-gradient(135deg, hsl(var(--pe-blue)), hsl(var(--pe-red)));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  .gradient-gold {
-    background: linear-gradient(135deg, hsl(45, 95%, 50%), hsl(35, 90%, 45%));
+  .gradient-text-gold {
+    background: linear-gradient(135deg, hsl(var(--pe-gold)), hsl(35 90% 40%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
+
   .bg-hero-pattern {
-    background-image: 
-      radial-gradient(circle at 20% 50%, hsl(220 85% 45% / 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, hsl(0 78% 50% / 0.06) 0%, transparent 50%),
-      radial-gradient(circle at 60% 80%, hsl(45 95% 50% / 0.06) 0%, transparent 50%);
+    background-image:
+      radial-gradient(ellipse 80% 60% at 10% 90%, hsl(var(--pe-blue) / 0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 10%, hsl(var(--pe-red) / 0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, hsl(var(--pe-gold) / 0.08) 0%, transparent 60%);
+  }
+
+  .bg-section-blue {
+    background-color: hsl(var(--pe-blue-light));
+  }
+  .bg-section-red {
+    background-color: hsl(var(--pe-red-light));
+  }
+  .bg-section-gold {
+    background-color: hsl(var(--pe-gold-light));
   }
 }
