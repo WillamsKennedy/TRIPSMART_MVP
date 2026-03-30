@@ -18,8 +18,31 @@ const Auth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+  const validateAge = (dateStr: string): boolean => {
+    const birth = new Date(dateStr);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age >= 18;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLogin) {
+      if (!passwordRegex.test(password)) {
+        toast({ title: 'Senha fraca', description: 'A senha deve ter no mínimo 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial.', variant: 'destructive' });
+        return;
+      }
+      if (!birthDate || !validateAge(birthDate)) {
+        toast({ title: 'Idade inválida', description: 'Você precisa ter pelo menos 18 anos para se cadastrar.', variant: 'destructive' });
+        return;
+      }
+    }
+
     setLoading(true);
     const { error } = isLogin
       ? await signIn(email, password)
