@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Heart, MessageCircle, Bookmark, Star, MapPin, Users, Calendar, Send } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Bookmark, Star, MapPin, Users, Calendar, Send, Navigation } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { monthNames } from '@/data/mockData';
 
@@ -20,7 +20,6 @@ const Community = () => {
   const [commentText, setCommentText] = useState<Record<string, string>>({});
   const [expandedComments, setExpandedComments] = useState<Record<string, boolean>>({});
   const [ratings, setRatings] = useState<Record<string, number>>({});
-  const [selectedItinerary, setSelectedItinerary] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
@@ -29,23 +28,40 @@ const Community = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const { data: itin } = await supabase.from('shared_itineraries' as any).select('*, profiles(display_name, avatar_url)').order('created_at', { ascending: false });
-    setItineraries((itin as any[]) || []);
+
+    // Fetch itineraries
+    const { data: itin } = await supabase.from('shared_itineraries').select('*').order('created_at', { ascending: false });
+    const itinList = (itin || []) as any[];
+
+    // Fetch profiles for all user_ids
+    const userIds = [...new Set(itinList.map(i => i.user_id))];
+    const profilesMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('id, display_name, avatar_url').in('id', userIds);
+      (profiles || []).forEach((p: any) => { profilesMap[p.id] = p; });
+    }
+
+    // Merge profiles into itineraries
+    const enriched = itinList.map(it => ({
+      ...it,
+      profile: profilesMap[it.user_id] || null,
+    }));
+    setItineraries(enriched);
 
     if (user) {
-      const { data: userLikes } = await supabase.from('itinerary_likes' as any).select('itinerary_id').eq('user_id', user.id);
+      const { data: userLikes } = await supabase.from('itinerary_likes').select('itinerary_id').eq('user_id', user.id);
       const likesMap: Record<string, boolean> = {};
-      (userLikes as any[] || []).forEach((l: any) => { likesMap[l.itinerary_id] = true; });
+      (userLikes || []).forEach((l: any) => { likesMap[l.itinerary_id] = true; });
       setLikes(likesMap);
 
-      const { data: userSaves } = await supabase.from('saved_itineraries' as any).select('itinerary_id').eq('user_id', user.id);
+      const { data: userSaves } = await supabase.from('saved_itineraries').select('itinerary_id').eq('user_id', user.id);
       const savesMap: Record<string, boolean> = {};
-      (userSaves as any[] || []).forEach((s: any) => { savesMap[s.itinerary_id] = true; });
+      (userSaves || []).forEach((s: any) => { savesMap[s.itinerary_id] = true; });
       setSaves(savesMap);
 
-      const { data: userRatings } = await supabase.from('itinerary_ratings' as any).select('itinerary_id, score').eq('user_id', user.id);
+      const { data: userRatings } = await supabase.from('itinerary_ratings').select('itinerary_id, score').eq('user_id', user.id);
       const ratingsMap: Record<string, number> = {};
-      (userRatings as any[] || []).forEach((r: any) => { ratingsMap[r.itinerary_id] = r.score; });
+      (userRatings || []).forEach((r: any) => { ratingsMap[r.itinerary_id] = r.score; });
       setRatings(ratingsMap);
     }
     setLoading(false);
@@ -54,11 +70,11 @@ const Community = () => {
   const toggleLike = async (id: string) => {
     if (!user) return;
     if (likes[id]) {
-      await supabase.from('itinerary_likes' as any).delete().eq('user_id', user.id).eq('itinerary_id', id);
+      await supabase.from('itinerary_likes').delete().eq('user_id', user.id).eq('itinerary_id', id);
       setLikes(prev => ({ ...prev, [id]: false }));
       setItineraries(prev => prev.map(it => it.id === id ? { ...it, likes_count: Math.max(0, (it.likes_count || 0) - 1) } : it));
     } else {
-      await supabase.from('itinerary_likes' as any).insert({ user_id: user.id, itinerary_id: id } as any);
+      await supabase.from('itinerary_likes').insert({ user_id: user.id, itinerary_id: id });
       setLikes(prev => ({ ...prev, [id]: true }));
       setItineraries(prev => prev.map(it => it.id === id ? { ...it, likes_count: (it.likes_count || 0) + 1 } : it));
     }
@@ -67,11 +83,11 @@ const Community = () => {
   const toggleSave = async (id: string) => {
     if (!user) return;
     if (saves[id]) {
-      await supabase.from('saved_itineraries' as any).delete().eq('user_id', user.id).eq('itinerary_id', id);
+      await supabase.from('saved_itineraries').delete().eq('user_id', user.id).eq('itinerary_id', id);
       setSaves(prev => ({ ...prev, [id]: false }));
       toast({ title: 'Roteiro removido dos salvos' });
     } else {
-      await supabase.from('saved_itineraries' as any).insert({ user_id: user.id, itinerary_id: id } as any);
+      await supabase.from('saved_itineraries').insert({ user_id: user.id, itinerary_id: id });
       setSaves(prev => ({ ...prev, [id]: true }));
       toast({ title: 'Roteiro salvo! 📌' });
     }
@@ -81,17 +97,26 @@ const Community = () => {
     if (!user) return;
     const existing = ratings[id];
     if (existing) {
-      await supabase.from('itinerary_ratings' as any).update({ score } as any).eq('user_id', user.id).eq('itinerary_id', id);
+      await supabase.from('itinerary_ratings').update({ score }).eq('user_id', user.id).eq('itinerary_id', id);
     } else {
-      await supabase.from('itinerary_ratings' as any).insert({ user_id: user.id, itinerary_id: id, score } as any);
+      await supabase.from('itinerary_ratings').insert({ user_id: user.id, itinerary_id: id, score });
     }
     setRatings(prev => ({ ...prev, [id]: score }));
     toast({ title: `Avaliação: ${'⭐'.repeat(score)}` });
   };
 
   const loadComments = async (id: string) => {
-    const { data } = await supabase.from('itinerary_comments' as any).select('*, profiles(display_name)').eq('itinerary_id', id).order('created_at', { ascending: true });
-    setComments(prev => ({ ...prev, [id]: (data as any[]) || [] }));
+    const { data } = await supabase.from('itinerary_comments').select('*').eq('itinerary_id', id).order('created_at', { ascending: true });
+    const commentsList = (data || []) as any[];
+    // Fetch profiles for commenters
+    const userIds = [...new Set(commentsList.map(c => c.user_id))];
+    const profilesMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('id, display_name').in('id', userIds);
+      (profiles || []).forEach((p: any) => { profilesMap[p.id] = p; });
+    }
+    const enriched = commentsList.map(c => ({ ...c, profile: profilesMap[c.user_id] || null }));
+    setComments(prev => ({ ...prev, [id]: enriched }));
   };
 
   const toggleComments = async (id: string) => {
@@ -103,7 +128,7 @@ const Community = () => {
 
   const postComment = async (id: string) => {
     if (!user || !commentText[id]?.trim()) return;
-    await supabase.from('itinerary_comments' as any).insert({ user_id: user.id, itinerary_id: id, content: commentText[id].trim() } as any);
+    await supabase.from('itinerary_comments').insert({ user_id: user.id, itinerary_id: id, content: commentText[id].trim() });
     setCommentText(prev => ({ ...prev, [id]: '' }));
     await loadComments(id);
     toast({ title: 'Comentário enviado!' });
@@ -114,14 +139,26 @@ const Community = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/')}>
-            <ArrowLeft size={20} />
+    <div className="min-h-screen bg-background">
+      {/* Nav */}
+      <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <button onClick={() => navigate('/')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+            <div className="w-10 h-10 rounded-xl gradient-pe flex items-center justify-center">
+              <Navigation size={20} className="text-primary-foreground" />
+            </div>
+            <span className="text-xl font-black tracking-tight">
+              <span className="text-primary">TRIP</span><span className="text-accent">SMART</span>
+            </span>
+          </button>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-1.5 text-xs font-bold">
+            <ArrowLeft size={14} /> Início
           </Button>
-          <h1 className="text-3xl font-black tracking-display text-foreground">Comunidade</h1>
         </div>
+      </nav>
+
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <h1 className="text-3xl font-black tracking-display text-foreground mb-8">Comunidade</h1>
 
         {loading ? (
           <p className="text-muted-foreground text-center py-12">Carregando roteiros...</p>
@@ -146,10 +183,10 @@ const Community = () => {
                   {/* Author */}
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-full gradient-pe flex items-center justify-center text-xs font-bold text-primary-foreground">
-                      {(it.profiles?.display_name || 'U')[0].toUpperCase()}
+                      {(it.profile?.display_name || 'U')[0].toUpperCase()}
                     </div>
                     <div>
-                      <span className="text-sm font-bold text-foreground">{it.profiles?.display_name || 'Viajante'}</span>
+                      <span className="text-sm font-bold text-foreground">{it.profile?.display_name || 'Viajante'}</span>
                       <span className="text-xs text-muted-foreground block">{new Date(it.created_at).toLocaleDateString('pt-BR')}</span>
                     </div>
                   </div>
@@ -216,10 +253,10 @@ const Community = () => {
                     {(comments[it.id] || []).map((c: any) => (
                       <div key={c.id} className="flex gap-2">
                         <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground flex-shrink-0">
-                          {(c.profiles?.display_name || 'U')[0].toUpperCase()}
+                          {(c.profile?.display_name || 'U')[0].toUpperCase()}
                         </div>
                         <div>
-                          <span className="text-xs font-bold text-foreground">{c.profiles?.display_name || 'Viajante'}</span>
+                          <span className="text-xs font-bold text-foreground">{c.profile?.display_name || 'Viajante'}</span>
                           <p className="text-sm text-muted-foreground">{c.content}</p>
                         </div>
                       </div>
