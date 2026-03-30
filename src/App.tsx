@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Planner from "./pages/Planner";
 import TravelHistory from "./pages/TravelHistory";
 import Community from "./pages/Community";
+import Profile from "./pages/Profile";
 import ActivityDetail from "./pages/ActivityDetail";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/planejar" element={<Planner />} />
             <Route path="/historico" element={<TravelHistory />} />
             <Route path="/comunidade" element={<Community />} />
+            <Route path="/perfil" element={<Profile />} />
             <Route path="/atividade/:cityId/:spotId" element={<ActivityDetail />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
