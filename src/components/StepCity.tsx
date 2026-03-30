@@ -282,7 +282,7 @@ const StepCity = ({
                               </span>
                             ) : spot.peakMonths?.length > 0 ? (
                               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-muted/20 text-muted-foreground">
-                                Melhor em {getBestMonth(spot)}
+                                Mês em alta: {getBestMonth(spot)}
                               </span>
                             ) : null}
                           </div>
