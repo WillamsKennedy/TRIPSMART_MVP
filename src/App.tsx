@@ -37,6 +37,7 @@ const App = () => (
         </AuthProvider>
       </HashRouter>
     </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
