@@ -11,6 +11,8 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
@@ -19,7 +21,9 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = isLogin ? await signIn(email, password) : await signUp(email, password);
+    const { error } = isLogin
+      ? await signIn(email, password)
+      : await signUp(email, password, fullName, birthDate);
     setLoading(false);
 
     if (error) {
@@ -53,7 +57,33 @@ const Auth = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5 p-8 rounded-2xl border border-border bg-card" style={{ boxShadow: 'var(--card-shadow)' }}>
+        <form onSubmit={handleSubmit} className="space-y-4 p-8 rounded-2xl border border-border bg-card" style={{ boxShadow: 'var(--card-shadow)' }}>
+          {!isLogin && (
+            <>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Nome completo</label>
+                <Input
+                  type="text"
+                  placeholder="Seu nome"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  maxLength={100}
+                  className="h-12 rounded-xl"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">Data de nascimento</label>
+                <Input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  required
+                  className="h-12 rounded-xl"
+                />
+              </div>
+            </>
+          )}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground">Email</label>
             <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 rounded-xl" />
