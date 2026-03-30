@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { ArrowLeft, Plane, Calendar, Users, MapPin, Trash2, DollarSign, Bus, Hotel, Utensils, Star, Navigation, ChevronRight } from 'lucide-react';
+import ThemeToggle from '@/components/ThemeToggle';
 import { budgetRanges, transportOptions, localTransportOptions, monthNames, categoryLabels } from '@/data/mockData';
 import type { TouristSpot, AccommodationDetail, ItineraryDay } from '@/types/travel';
 
