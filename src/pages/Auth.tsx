@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
-import { Navigation } from 'lucide-react';
+import { Navigation, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
@@ -31,7 +31,6 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!isLogin) {
       if (!passwordRegex.test(password)) {
         toast({ title: 'Senha fraca', description: 'A senha deve ter no mínimo 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial.', variant: 'destructive' });
@@ -42,13 +41,11 @@ const Auth = () => {
         return;
       }
     }
-
     setLoading(true);
     const { error } = isLogin
       ? await signIn(email, password)
       : await signUp(email, password, fullName, birthDate);
     setLoading(false);
-
     if (error) {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     } else if (!isLogin) {
@@ -59,73 +56,105 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-hero-pattern flex items-center justify-center px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-md"
-      >
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="w-14 h-14 rounded-2xl gradient-pe flex items-center justify-center">
-              <Navigation size={28} className="text-primary-foreground" />
-            </div>
+    <div className="min-h-screen flex">
+      {/* Left side — Blue panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-pe-blue relative flex-col justify-between p-12">
+        <button onClick={() => navigate('/')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+          <div className="w-10 h-10 rounded-xl bg-pe-gold flex items-center justify-center">
+            <Navigation size={20} className="text-pe-navy" />
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-foreground">
-            <span className="text-primary">TRIP</span><span className="text-accent">SMART</span>
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {isLogin ? 'Entre para planejar sua viagem' : 'Crie sua conta e comece a explorar'}
-          </p>
+          <span className="text-xl font-black tracking-tight text-white">
+            TRIP<span className="text-pe-gold">SMART</span>
+          </span>
+        </button>
+
+        <div className="space-y-6">
+          <h2 className="text-4xl font-black text-white tracking-display leading-tight">
+            Explore<br />Pernambuco<br />com <span className="text-pe-gold">inteligência</span>
+          </h2>
+          <p className="text-white/60 max-w-sm">Roteiros personalizados com IA para cidades pernambucanas.</p>
+          <div className="flex gap-3">
+            {["🏖️", "🐢", "🎭", "🌊"].map((e, i) => (
+              <div key={i} className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center text-2xl">{e}</div>
+            ))}
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-8 rounded-2xl border border-border bg-card" style={{ boxShadow: 'var(--card-shadow)' }}>
-          {!isLogin && (
-            <>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Nome completo</label>
-                <Input
-                  type="text"
-                  placeholder="Seu nome"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  maxLength={100}
-                  className="h-12 rounded-xl"
-                />
+        <p className="text-white/30 text-xs">© {new Date().getFullYear()} TripSmart</p>
+
+        {/* Decorative shapes */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-pe-red/20 rounded-bl-[60px]" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-pe-gold/15 rounded-tr-[40px]" />
+      </div>
+
+      {/* Right side — Form */}
+      <div className="flex-1 flex items-center justify-center px-6 bg-background">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md"
+        >
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-8">
+            <button onClick={() => navigate('/')} className="inline-flex items-center gap-2 mb-2">
+              <div className="w-12 h-12 rounded-2xl bg-pe-blue flex items-center justify-center">
+                <Navigation size={24} className="text-white" />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Data de nascimento</label>
-                <Input
-                  type="date"
-                  value={birthDate}
-                  onChange={(e) => setBirthDate(e.target.value)}
-                  required
-                  className="h-12 rounded-xl"
-                />
-              </div>
-            </>
-          )}
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">Email</label>
-            <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 rounded-xl" />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-foreground">Senha</label>
-            <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="h-12 rounded-xl" />
-          </div>
-          <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-base font-bold gradient-pe border-0 text-primary-foreground">
-            {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar conta'}
-          </Button>
-          <p className="text-center text-sm text-muted-foreground">
-            {isLogin ? 'Não tem conta?' : 'Já tem conta?'}{' '}
-            <button type="button" onClick={() => setIsLogin(!isLogin)} className="font-bold text-primary hover:underline">
-              {isLogin ? 'Cadastre-se' : 'Faça login'}
             </button>
-          </p>
-        </form>
-      </motion.div>
+            <h1 className="text-2xl font-black tracking-tight text-foreground">
+              <span className="text-primary">TRIP</span><span className="text-pe-gold">SMART</span>
+            </h1>
+          </div>
+
+          <div className="mb-8">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-1.5 text-xs font-bold text-muted-foreground mb-4 lg:mb-6">
+              <ArrowLeft size={14} /> Voltar ao início
+            </Button>
+            <h1 className="text-3xl font-black tracking-display text-foreground">
+              {isLogin ? 'Bem-vindo de volta' : 'Criar conta'}
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              {isLogin ? 'Entre para planejar sua viagem' : 'Cadastre-se para começar a explorar'}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-foreground">Nome completo</label>
+                  <Input type="text" placeholder="Seu nome" value={fullName} onChange={(e) => setFullName(e.target.value)} required maxLength={100} className="h-12 rounded-xl border-border bg-card" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-foreground">Data de nascimento</label>
+                  <Input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} required className="h-12 rounded-xl border-border bg-card" />
+                </div>
+              </>
+            )}
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground">Email</label>
+              <Input type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-12 rounded-xl border-border bg-card" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-foreground">Senha</label>
+              <Input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} className="h-12 rounded-xl border-border bg-card" />
+              {!isLogin && (
+                <p className="text-xs text-muted-foreground">Mín. 8 caracteres, 1 maiúscula, 1 número, 1 especial</p>
+              )}
+            </div>
+            <Button type="submit" disabled={loading} className="w-full h-12 rounded-xl text-base font-bold bg-pe-blue hover:bg-pe-blue/90 text-white border-0">
+              {loading ? 'Carregando...' : isLogin ? 'Entrar' : 'Criar conta'}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground pt-2">
+              {isLogin ? 'Não tem conta?' : 'Já tem conta?'}{' '}
+              <button type="button" onClick={() => setIsLogin(!isLogin)} className="font-bold text-primary hover:underline">
+                {isLogin ? 'Cadastre-se' : 'Faça login'}
+              </button>
+            </p>
+          </form>
+        </motion.div>
+      </div>
     </div>
   );
 };
