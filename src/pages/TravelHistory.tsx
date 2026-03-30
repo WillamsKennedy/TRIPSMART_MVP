@@ -82,14 +82,14 @@ const TravelHistory = () => {
       {/* Nav */}
       <nav className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+          <button onClick={() => navigate('/')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 rounded-xl gradient-pe flex items-center justify-center">
               <Navigation size={20} className="text-primary-foreground" />
             </div>
             <span className="text-xl font-black tracking-tight">
               <span className="text-primary">TRIP</span><span className="text-accent">SMART</span>
             </span>
-          </div>
+          </button>
           <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-1.5 text-xs font-bold">
             <ArrowLeft size={14} /> Início
           </Button>
