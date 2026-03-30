@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Navigation } from "lucide-react";
 import type { TravelState, TouristSpot, AccommodationDetail } from "@/types/travel";
 
-type StepName = 'budget' | 'group' | 'month' | 'transport-arrival' | 'city' | 'accommodation' | 'local-transport' | 'summary';
+type StepName = 'budget' | 'month' | 'transport-arrival' | 'city' | 'accommodation' | 'local-transport' | 'summary';
 
 const initialState: TravelState = {
   budget: 0, budgetLabel: '', people: 1, adults: 1, children: 0, isCouple: false, rooms: 1, days: 3, groupType: "solo",
