@@ -35,10 +35,7 @@ const Planner = () => {
   useEffect(() => { const c = searchParams.get('city'); if (c) setPreSelectedCity(c); }, [searchParams]);
 
   const getSteps = (): StepName[] => {
-    const steps: StepName[] = ['budget'];
-    if (data.people > 1 && !data.isCouple) steps.push('group');
-    steps.push('month', 'transport-arrival', 'city', 'accommodation', 'local-transport', 'summary');
-    return steps;
+    return ['budget', 'month', 'transport-arrival', 'city', 'accommodation', 'local-transport', 'summary'];
   };
 
   const goBack = () => { const s = getSteps(); const i = s.indexOf(step); if (i > 0) setStep(s[i - 1]); };
