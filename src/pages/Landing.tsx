@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   MapPin, Sun, Compass, Star, ArrowRight, LogOut, History,
   Search, Filter, Users, Navigation, ChevronUp, Palmtree, Utensils, Waves, Mountain,
