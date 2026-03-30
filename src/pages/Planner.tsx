@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import BudgetBar from "@/components/BudgetBar";
 import StepBudget from "@/components/StepBudget";
-import StepGroupType from "@/components/StepGroupType";
+
 import StepMonth from "@/components/StepMonth";
 import StepTransportArrival from "@/components/StepTransportArrival";
 import StepCity from "@/components/StepCity";
@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Navigation } from "lucide-react";
 import type { TravelState, TouristSpot, AccommodationDetail } from "@/types/travel";
 
-type StepName = 'budget' | 'group' | 'month' | 'transport-arrival' | 'city' | 'accommodation' | 'local-transport' | 'summary';
+type StepName = 'budget' | 'month' | 'transport-arrival' | 'city' | 'accommodation' | 'local-transport' | 'summary';
 
 const initialState: TravelState = {
   budget: 0, budgetLabel: '', people: 1, adults: 1, children: 0, isCouple: false, rooms: 1, days: 3, groupType: "solo",
@@ -35,24 +35,16 @@ const Planner = () => {
   useEffect(() => { const c = searchParams.get('city'); if (c) setPreSelectedCity(c); }, [searchParams]);
 
   const getSteps = (): StepName[] => {
-    const steps: StepName[] = ['budget'];
-    if (data.people > 1 && !data.isCouple) steps.push('group');
-    steps.push('month', 'transport-arrival', 'city', 'accommodation', 'local-transport', 'summary');
-    return steps;
+    return ['budget', 'month', 'transport-arrival', 'city', 'accommodation', 'local-transport', 'summary'];
   };
 
   const goBack = () => { const s = getSteps(); const i = s.indexOf(step); if (i > 0) setStep(s[i - 1]); };
 
   const handleBudget = (budget: number, budgetLabel: string, people: number, days: number, adults: number, children: number, isCouple: boolean, rooms: number) => {
-    const groupType = people === 1 ? "solo" : isCouple ? "couple" : data.groupType === "solo" ? "friends" : data.groupType;
+    const groupType = people === 1 ? "solo" : isCouple ? "couple" : "friends";
     setData(d => ({ ...d, budget, budgetLabel, people, days, adults, children, isCouple, rooms, groupType }));
-    if (isCouple || people <= 1) {
-      setStep('month');
-    } else {
-      setStep('group');
-    }
+    setStep('month');
   };
-  const handleGroupType = (type: "couple" | "friends") => { setData(d => ({ ...d, groupType: type })); setStep('month'); };
   const handleMonth = (month: number) => { setData(d => ({ ...d, month })); setStep('transport-arrival'); };
   const handleTransportArrival = (transport: string) => { setData(d => ({ ...d, transportToDestination: transport })); setStep('city'); };
   const handleCity = (cityId: string, cityName: string, spots: TouristSpot[]) => { setData(d => ({ ...d, city: cityId, cityName, selectedSpots: spots })); setStep('accommodation'); };
@@ -96,7 +88,6 @@ const Planner = () => {
         <div className="w-full max-w-3xl">
           <AnimatePresence mode="wait">
             {step === 'budget' && <StepBudget key="budget" onNext={handleBudget} />}
-            {step === 'group' && <StepGroupType key="group" people={data.people} onNext={handleGroupType} />}
             {step === 'month' && <StepMonth key="month" onNext={handleMonth} />}
             {step === 'transport-arrival' && <StepTransportArrival key="transport" onNext={handleTransportArrival} />}
             {step === 'city' && (
