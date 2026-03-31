@@ -264,14 +264,12 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       </div>
 
       {/* Google Maps Link */}
-      <a
-        href={generateMapsUrl()}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        onClick={openGoogleMaps}
         className="flex items-center gap-2 px-6 py-3 rounded-full border border-primary text-primary font-bold hover:bg-primary/10 transition-colors"
       >
         <ExternalLink size={16} /> Abrir roteiro no Google Maps
-      </a>
+      </button>
 
       {/* Generate itinerary via n8n */}
       <div className="w-full p-5 rounded-2xl border border-dashed border-primary/40 bg-primary/5">
