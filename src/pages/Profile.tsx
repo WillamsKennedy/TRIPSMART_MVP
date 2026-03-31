@@ -56,7 +56,7 @@ const Profile = () => {
   const handleSaveProfile = async () => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({ display_name: displayName.trim() || null, avatar_url: avatarUrl.trim() || null }).eq('id', user.id);
+    const { error } = await supabase.from('profiles').upsert({ id: user.id, display_name: displayName.trim() || null, avatar_url: avatarUrl.trim() || null });
     setSaving(false);
     if (error) { toast({ title: 'Erro ao salvar', description: error.message, variant: 'destructive' }); }
     else { setEditing(false); toast({ title: 'Perfil atualizado! ✅' }); }
