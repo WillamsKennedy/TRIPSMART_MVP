@@ -130,9 +130,8 @@ const Landing = () => {
                 <Compass size={22} /> Começar a planejar
               </Button>
               <Button
-                variant="outline"
                 onClick={() => document.getElementById('destinos')?.scrollIntoView({ behavior: 'smooth' })}
-                className="rounded-full px-8 h-14 text-lg font-bold border-white/30 text-white hover:bg-white/10 hover:text-white"
+                className="bg-pe-blue hover:bg-pe-blue/90 text-white border-0 rounded-full px-8 h-14 text-lg font-bold gap-2 shadow-lg"
               >
                 Ver destinos
               </Button>
