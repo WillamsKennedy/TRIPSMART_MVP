@@ -11,6 +11,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
+const toCoord = (v: string | number) => Number(String(v).replace(',', '.'));
+
 const createIcon = (color: string, emoji: string) =>
   L.divIcon({
     html: `<div style="background:${color};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${emoji}</div>`,
@@ -34,9 +36,9 @@ const TravelMap = ({ spots, accommodation, restaurants }: TravelMapProps) => {
 
     const allPoints: [number, number][] = [];
     
-    if (accommodation) allPoints.push([accommodation.lat, accommodation.lng]);
-    spots.forEach(s => allPoints.push([s.lat, s.lng]));
-    restaurants.forEach(r => allPoints.push([r.lat, r.lng]));
+    if (accommodation) allPoints.push([toCoord(accommodation.lat), toCoord(accommodation.lng)]);
+    spots.forEach(s => allPoints.push([toCoord(s.lat), toCoord(s.lng)]));
+    restaurants.forEach(r => allPoints.push([toCoord(r.lat), toCoord(r.lng)]));
 
     if (allPoints.length === 0) return;
 
@@ -54,21 +56,21 @@ const TravelMap = ({ spots, accommodation, restaurants }: TravelMapProps) => {
 
     // Accommodation marker
     if (accommodation) {
-      L.marker([accommodation.lat, accommodation.lng], { icon: createIcon('#FF6B35', '🏨') })
+      L.marker([toCoord(accommodation.lat), toCoord(accommodation.lng)], { icon: createIcon('#FF6B35', '🏨') })
         .addTo(map)
         .bindPopup(`<b>${accommodation.name}</b><br/>${accommodation.address}<br/>⭐ ${accommodation.rating} · R$ ${accommodation.pricePerNight}/noite`);
     }
 
     // Tourist spots
     spots.forEach(s => {
-      L.marker([s.lat, s.lng], { icon: createIcon('#00B4D8', s.imageEmoji) })
+      L.marker([toCoord(s.lat), toCoord(s.lng)], { icon: createIcon('#00B4D8', s.imageEmoji) })
         .addTo(map)
         .bindPopup(`<b>${s.name}</b><br/>${s.description}<br/>⭐ ${s.rating}`);
     });
 
     // Restaurants
     restaurants.forEach(r => {
-      L.marker([r.lat, r.lng], { icon: createIcon('#E91E63', '🍽️') })
+      L.marker([toCoord(r.lat), toCoord(r.lng)], { icon: createIcon('#E91E63', '🍽️') })
         .addTo(map)
         .bindPopup(`<b>${r.name}</b><br/>${r.cuisine} · ${r.priceRange}<br/>⭐ ${r.rating}`);
     });
