@@ -158,15 +158,19 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     setLoadingItinerary(false);
   };
 
-  const generateMapsUrl = () => {
+  const openGoogleMaps = () => {
     const points: string[] = [];
     if (data.accommodation) points.push(`${data.accommodation.lat},${data.accommodation.lng}`);
     data.selectedSpots.forEach((s) => points.push(`${s.lat},${s.lng}`));
-    if (points.length < 2) return "#";
+    if (points.length === 0) return;
+    if (points.length === 1) {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${points[0]}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
     const origin = points[0];
     const dest = points[points.length - 1];
     const waypoints = points.slice(1, -1).join("|");
-    return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&waypoints=${waypoints}&travelmode=walking`;
+    window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&waypoints=${waypoints}&travelmode=walking`, '_blank', 'noopener,noreferrer');
   };
 
   return (
