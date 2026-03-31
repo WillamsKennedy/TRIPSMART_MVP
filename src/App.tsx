@@ -12,6 +12,7 @@ import TravelHistory from "./pages/TravelHistory";
 import Community from "./pages/Community";
 import Profile from "./pages/Profile";
 import ActivityDetail from "./pages/ActivityDetail";
+import RouteGenerator from "./pages/RouteGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
