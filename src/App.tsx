@@ -33,6 +33,7 @@ const App = () => (
             <Route path="/comunidade" element={<Community />} />
             <Route path="/perfil" element={<Profile />} />
             <Route path="/atividade/:cityId/:spotId" element={<ActivityDetail />} />
+            <Route path="/gerador" element={<RouteGenerator />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
