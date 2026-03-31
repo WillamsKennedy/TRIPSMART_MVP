@@ -36,9 +36,9 @@ const TravelMap = ({ spots, accommodation, restaurants }: TravelMapProps) => {
 
     const allPoints: [number, number][] = [];
     
-    if (accommodation) allPoints.push([accommodation.lat, accommodation.lng]);
-    spots.forEach(s => allPoints.push([s.lat, s.lng]));
-    restaurants.forEach(r => allPoints.push([r.lat, r.lng]));
+    if (accommodation) allPoints.push([toCoord(accommodation.lat), toCoord(accommodation.lng)]);
+    spots.forEach(s => allPoints.push([toCoord(s.lat), toCoord(s.lng)]));
+    restaurants.forEach(r => allPoints.push([toCoord(r.lat), toCoord(r.lng)]));
 
     if (allPoints.length === 0) return;
 
