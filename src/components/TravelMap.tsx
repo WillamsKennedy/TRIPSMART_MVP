@@ -56,21 +56,21 @@ const TravelMap = ({ spots, accommodation, restaurants }: TravelMapProps) => {
 
     // Accommodation marker
     if (accommodation) {
-      L.marker([accommodation.lat, accommodation.lng], { icon: createIcon('#FF6B35', '🏨') })
+      L.marker([toCoord(accommodation.lat), toCoord(accommodation.lng)], { icon: createIcon('#FF6B35', '🏨') })
         .addTo(map)
         .bindPopup(`<b>${accommodation.name}</b><br/>${accommodation.address}<br/>⭐ ${accommodation.rating} · R$ ${accommodation.pricePerNight}/noite`);
     }
 
     // Tourist spots
     spots.forEach(s => {
-      L.marker([s.lat, s.lng], { icon: createIcon('#00B4D8', s.imageEmoji) })
+      L.marker([toCoord(s.lat), toCoord(s.lng)], { icon: createIcon('#00B4D8', s.imageEmoji) })
         .addTo(map)
         .bindPopup(`<b>${s.name}</b><br/>${s.description}<br/>⭐ ${s.rating}`);
     });
 
     // Restaurants
     restaurants.forEach(r => {
-      L.marker([r.lat, r.lng], { icon: createIcon('#E91E63', '🍽️') })
+      L.marker([toCoord(r.lat), toCoord(r.lng)], { icon: createIcon('#E91E63', '🍽️') })
         .addTo(map)
         .bindPopup(`<b>${r.name}</b><br/>${r.cuisine} · ${r.priceRange}<br/>⭐ ${r.rating}`);
     });
