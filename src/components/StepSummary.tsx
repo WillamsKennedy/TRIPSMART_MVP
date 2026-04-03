@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, Star } from "lucide-react";
+import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, MapPin, Clock, DollarSign, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Navigation, Info, Instagram, Phone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import TravelMap from "@/components/TravelMap";
 import { monthNames, transportOptions, localTransportOptions } from "@/data/mockData";
 import type { TravelState } from "@/types/travel";
+import type { RichItinerary, RichDay, RichActivity, AttractionZone, AttractionHighlight } from "@/types/richItinerary";
 
 interface StepSummaryProps {
   data: TravelState;
@@ -22,12 +23,17 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const [shared, setShared] = useState(false);
   const [sharing, setSharing] = useState(false);
   const [loadingItinerary, setLoadingItinerary] = useState(false);
-  const [itineraryData, setItineraryData] = useState<any[] | null>(null);
+  const [richItinerary, setRichItinerary] = useState<RichItinerary | null>(null);
+  const [expandedZones, setExpandedZones] = useState<Record<number, boolean>>({});
+  const [expandedHighlights, setExpandedHighlights] = useState<Record<string, boolean>>({});
 
   const transportLabel =
     transportOptions.find((t) => t.id === data.transportToDestination)?.label || data.transportToDestination;
   const localTransportLabel =
     localTransportOptions.find((t) => t.id === data.localTransport)?.label || data.localTransport;
+
+  const toggleZone = (i: number) => setExpandedZones((p) => ({ ...p, [i]: !p[i] }));
+  const toggleHighlight = (key: string) => setExpandedHighlights((p) => ({ ...p, [key]: !p[key] }));
 
   const handleSave = async () => {
     if (!user) return;
@@ -59,8 +65,6 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const handleShare = async () => {
     if (!user) return;
     setSharing(true);
-
-    // Save to community
     const { error: shareError } = await supabase.from("shared_itineraries").insert({
       user_id: user.id,
       title: `${data.days} dias em ${data.cityName}`,
@@ -77,10 +81,8 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       selected_spots: data.selectedSpots as any,
       accommodation: data.accommodation as any,
       local_transport: data.localTransport,
-      itinerary_data: itineraryData,
+      itinerary_data: richItinerary as any,
     } as any);
-
-    // Also save to history if not already saved
     if (!saved) {
       await supabase.from("travel_history").insert({
         user_id: user.id,
@@ -99,7 +101,6 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       });
       setSaved(true);
     }
-
     setSharing(false);
     if (shareError) {
       toast({ title: "Erro ao compartilhar", description: shareError.message, variant: "destructive" });
@@ -143,14 +144,12 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       });
       if (error) throw error;
       if (result?.data) {
-        // n8n returns array with one rich itinerary object; extract days
         const raw = Array.isArray(result.data) ? result.data[0] : result.data;
-        const days = raw?.days || raw;
-        setItineraryData(Array.isArray(days) ? days : [raw]);
+        setRichItinerary(raw as RichItinerary);
         toast({ title: "Roteiro gerado! 🤖" });
       } else {
         toast({
-          title: "Erro: Não foi possivel formular o roteiro",
+          title: "Erro: Não foi possível formular o roteiro",
           description: "Configure o webhook generate-itinerary no n8n.",
           variant: "destructive",
         });
@@ -196,10 +195,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       </div>
 
       {/* Summary Card */}
-      <div
-        className="w-full p-6 rounded-2xl border border-border bg-card space-y-4"
-        style={{ boxShadow: "var(--card-shadow)" }}
-      >
+      <div className="w-full p-6 rounded-2xl border border-border bg-card space-y-4" style={{ boxShadow: "var(--card-shadow)" }}>
         <SummaryRow label="Orçamento" value={data.budgetLabel} />
         <SummaryRow label="Adultos" value={`${data.adults}`} />
         {data.children > 0 && <SummaryRow label="Crianças" value={`${data.children}`} />}
@@ -216,9 +212,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
         {data.selectedSpots.length > 0 && (
           <div className="pt-2 border-t border-border">
-            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Atividades Selecionadas
-            </span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Atividades Selecionadas</span>
             <div className="flex flex-wrap gap-2 mt-2">
               {data.selectedSpots.map((s) => (
                 <span key={s.id} className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary">
@@ -254,15 +248,9 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         </div>
         <TravelMap spots={data.selectedSpots} accommodation={data.accommodation} restaurants={[]} />
         <div className="flex flex-wrap items-center gap-3">
-          <span className="flex items-center gap-1 text-xs">
-            <span className="w-3 h-3 rounded-full" style={{ background: "#FF6B35" }} /> Hospedagem
-          </span>
-          <span className="flex items-center gap-1 text-xs">
-            <span className="w-3 h-3 rounded-full" style={{ background: "#00B4D8" }} /> Atividades
-          </span>
-          <span className="flex items-center gap-1 text-xs">
-            <span className="w-3 h-3 rounded-full" style={{ background: "#E91E63" }} /> Restaurantes
-          </span>
+          <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: "#FF6B35" }} /> Hospedagem</span>
+          <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: "#00B4D8" }} /> Atividades</span>
+          <span className="flex items-center gap-1 text-xs"><span className="w-3 h-3 rounded-full" style={{ background: "#E91E63" }} /> Restaurantes</span>
         </div>
       </div>
 
@@ -274,32 +262,208 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         <ExternalLink size={16} /> Abrir roteiro no Google Maps
       </button>
 
-      {/* Generate itinerary via n8n */}
-      <div className="w-full p-5 rounded-2xl border border-dashed border-primary/40 bg-primary/5">
-        <div className="flex items-center gap-2 mb-3">
+      {/* ===== RICH ITINERARY SECTION ===== */}
+      <div className="w-full space-y-6">
+        <div className="flex items-center gap-2">
           <CalendarDays size={20} className="text-primary" />
-          <span className="font-bold text-foreground">Roteiro dia a dia</span>
+          <span className="font-bold text-lg text-foreground">Roteiro dia a dia</span>
         </div>
-        {itineraryData ? (
-          <div className="space-y-4">
-            {itineraryData.map((day: any, i: number) => (
-              <div key={i} className="p-3 rounded-xl bg-card border border-border">
-                <h4 className="font-bold text-foreground">
-                  Dia {day.day}: {day.title}
+
+        {richItinerary ? (
+          <div className="space-y-8">
+            {/* Introduction */}
+            <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20">
+              <h3 className="text-2xl md:text-3xl font-extrabold text-foreground mb-2">{richItinerary.city}</h3>
+              <p className="text-muted-foreground leading-relaxed">{richItinerary.introduction}</p>
+            </div>
+
+            {/* Festive Alert */}
+            {richItinerary.festiveAlert && (
+              <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex gap-3">
+                <AlertTriangle size={24} className="text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-bold text-foreground">🎉 {richItinerary.festiveAlert.name}</h4>
+                  <p className="text-sm text-muted-foreground mt-1">{richItinerary.festiveAlert.description}</p>
+                  <span className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                    Preços ~{richItinerary.festiveAlert.priceIncrease} acima do normal
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Day-by-day summary cards */}
+            <div className="space-y-3">
+              {richItinerary.days?.map((day: RichDay) => (
+                <div key={day.day} className="p-5 rounded-2xl border border-border bg-card" style={{ boxShadow: "var(--card-shadow)" }}>
+                  <h4 className="font-extrabold text-foreground text-lg mb-1">Dia {day.day}</h4>
+                  <p className="text-primary font-semibold text-sm mb-1">{day.title}</p>
+                  <p className="text-muted-foreground text-sm">{day.summary}</p>
+
+                  {/* Activities timeline */}
+                  <div className="mt-4 space-y-3 border-l-2 border-primary/20 pl-4 ml-2">
+                    {day.activities?.map((act: RichActivity, j: number) => (
+                      <div key={j} className="relative">
+                        <div className="absolute -left-[22px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">{act.time}</span>
+                            <span className="text-xs text-muted-foreground">{act.period}</span>
+                            {act.duration && <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock size={10} />{act.duration}</span>}
+                          </div>
+                          <h5 className="font-bold text-foreground text-sm">{act.title}</h5>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{act.description}</p>
+                          <div className="flex flex-wrap gap-3 mt-1">
+                            {act.location && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <MapPin size={10} className="text-primary" /> {act.location}
+                              </span>
+                            )}
+                            {act.transport && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <Navigation size={10} className="text-primary" /> {act.transport}
+                              </span>
+                            )}
+                            {act.estimatedCost > 0 && (
+                              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                <DollarSign size={10} className="text-primary" /> R$ {act.estimatedCost}
+                              </span>
+                            )}
+                          </div>
+                          {act.tips && (
+                            <p className="text-xs text-primary/80 mt-1 flex items-start gap-1">
+                              <Lightbulb size={10} className="mt-0.5 shrink-0" /> {act.tips}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* ===== ATTRACTION ZONES ("Polos de Atrações") ===== */}
+            {richItinerary.attractionZones && richItinerary.attractionZones.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-xl md:text-2xl font-extrabold text-foreground flex items-center gap-2">
+                  <MapPin size={22} className="text-primary" />
+                  O que fazer em {richItinerary.city}: os polos de atrações
+                </h3>
+
+                {richItinerary.attractionZones.map((zone: AttractionZone, zi: number) => {
+                  const isOpen = expandedZones[zi] ?? true;
+                  return (
+                    <div key={zi} className="rounded-2xl border border-border bg-card overflow-hidden" style={{ boxShadow: "var(--card-shadow)" }}>
+                      <button
+                        onClick={() => toggleZone(zi)}
+                        className="w-full flex items-center justify-between p-5 text-left hover:bg-accent/50 transition-colors"
+                      >
+                        <h4 className="font-extrabold text-foreground text-lg">{zone.name}</h4>
+                        {isOpen ? <ChevronUp size={20} className="text-muted-foreground" /> : <ChevronDown size={20} className="text-muted-foreground" />}
+                      </button>
+
+                      {isOpen && (
+                        <div className="px-5 pb-5 space-y-5">
+                          <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">{zone.description}</p>
+
+                          {/* Recommended itinerary */}
+                          {zone.recommendedItinerary && (
+                            <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
+                              <h5 className="font-bold text-primary text-sm flex items-center gap-2">
+                                <Navigation size={14} /> {zone.recommendedItinerary.title}
+                              </h5>
+                              <p className="text-xs text-muted-foreground">{zone.recommendedItinerary.arrivalTime}</p>
+                              <ol className="list-decimal list-inside space-y-1">
+                                {zone.recommendedItinerary.steps.map((step: string, si: number) => (
+                                  <li key={si} className="text-sm text-foreground">{step}</li>
+                                ))}
+                              </ol>
+                            </div>
+                          )}
+
+                          {/* Highlights */}
+                          {zone.highlights?.map((hl: AttractionHighlight, hi: number) => {
+                            const hlKey = `${zi}-${hi}`;
+                            const hlOpen = expandedHighlights[hlKey] ?? false;
+                            return (
+                              <div key={hi} className="rounded-xl border border-border overflow-hidden">
+                                <button
+                                  onClick={() => toggleHighlight(hlKey)}
+                                  className="w-full flex items-center justify-between p-4 text-left hover:bg-accent/30 transition-colors"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <MapPin size={14} className="text-primary shrink-0" />
+                                    <span className="font-bold text-foreground text-sm">{hl.name}</span>
+                                  </div>
+                                  {hlOpen ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
+                                </button>
+                                {hlOpen && (
+                                  <div className="px-4 pb-4 space-y-3">
+                                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{hl.description}</p>
+                                    {hl.practicalInfo && (
+                                      <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                                        <h6 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1">
+                                          <Info size={10} /> Informações práticas
+                                        </h6>
+                                        {hl.practicalInfo.address && <p className="text-xs text-foreground flex items-center gap-1"><MapPin size={10} className="text-primary" /> {hl.practicalInfo.address}</p>}
+                                        {hl.practicalInfo.hours && <p className="text-xs text-foreground flex items-center gap-1"><Clock size={10} className="text-primary" /> {hl.practicalInfo.hours}</p>}
+                                        {hl.practicalInfo.price && <p className="text-xs text-foreground flex items-center gap-1"><DollarSign size={10} className="text-primary" /> {hl.practicalInfo.price}</p>}
+                                        {hl.practicalInfo.phone && <p className="text-xs text-foreground flex items-center gap-1"><Phone size={10} className="text-primary" /> {hl.practicalInfo.phone}</p>}
+                                        {hl.practicalInfo.instagram && <p className="text-xs text-foreground flex items-center gap-1"><Instagram size={10} className="text-primary" /> {hl.practicalInfo.instagram}</p>}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Practical Tips */}
+            {richItinerary.practicalTips && richItinerary.practicalTips.length > 0 && (
+              <div className="p-5 rounded-2xl border border-border bg-card space-y-3" style={{ boxShadow: "var(--card-shadow)" }}>
+                <h4 className="font-extrabold text-foreground flex items-center gap-2">
+                  <Lightbulb size={18} className="text-primary" /> Dicas práticas
                 </h4>
-                <div className="mt-2 space-y-1">
-                  {day.activities?.map((act: any, j: number) => (
-                    <p key={j} className="text-sm text-muted-foreground">
-                      <span className="font-semibold text-primary">{act.time}</span> — {act.description}
-                      {act.location && <span className="text-xs"> · 📍 {act.location}</span>}
-                    </p>
+                <div className="space-y-2">
+                  {richItinerary.practicalTips.map((tip, i) => (
+                    <div key={i} className="flex gap-2 items-start">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary shrink-0 mt-0.5">{tip.category}</span>
+                      <p className="text-sm text-muted-foreground">{tip.tip}</p>
+                    </div>
                   ))}
                 </div>
               </div>
-            ))}
+            )}
+
+            {/* Cost Breakdown */}
+            {richItinerary.costBreakdown && (
+              <div className="p-5 rounded-2xl border border-border bg-card space-y-3" style={{ boxShadow: "var(--card-shadow)" }}>
+                <h4 className="font-extrabold text-foreground flex items-center gap-2">
+                  <DollarSign size={18} className="text-primary" /> Estimativa de custos
+                </h4>
+                <div className="grid grid-cols-2 gap-2">
+                  <CostRow label="Hospedagem" value={richItinerary.costBreakdown.accommodation} />
+                  <CostRow label="Alimentação" value={richItinerary.costBreakdown.food} />
+                  <CostRow label="Transporte" value={richItinerary.costBreakdown.transport} />
+                  <CostRow label="Atividades" value={richItinerary.costBreakdown.activities} />
+                  <CostRow label="Extras" value={richItinerary.costBreakdown.extras} />
+                </div>
+                <div className="pt-3 border-t border-border flex justify-between">
+                  <span className="font-bold text-foreground">Total estimado</span>
+                  <span className="font-extrabold text-primary text-lg">R$ {richItinerary.estimatedTotalCost?.toLocaleString("pt-BR")}</span>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
-          <>
+          <div className="p-5 rounded-2xl border border-dashed border-primary/40 bg-primary/5">
             <p className="text-sm text-primary font-semibold">🤖 Gere o roteiro personalizado pela IA</p>
             <Button
               onClick={generateItinerary}
@@ -308,28 +472,19 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
             >
               <CalendarDays size={16} /> {loadingItinerary ? "Gerando roteiro..." : "Gerar roteiro com IA"}
             </Button>
-          </>
+          </div>
         )}
       </div>
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
         {!saved && !shared && (
-          <Button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2"
-          >
+          <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2">
             <Save size={16} /> {saving ? "Salvando..." : "Salvar no histórico"}
           </Button>
         )}
         {!shared && (
-          <Button
-            onClick={handleShare}
-            disabled={sharing}
-            variant="outline"
-            className="flex-1 rounded-full font-bold gap-2"
-          >
+          <Button onClick={handleShare} disabled={sharing} variant="outline" className="flex-1 rounded-full font-bold gap-2">
             <Share2 size={16} /> {sharing ? "Compartilhando..." : "Compartilhar roteiro"}
           </Button>
         )}
@@ -350,6 +505,13 @@ const SummaryRow = ({ label, value }: { label: string; value: string }) => (
   <div className="flex justify-between items-baseline">
     <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{label}</span>
     <span className="text-sm font-semibold text-foreground text-right max-w-[60%]">{value}</span>
+  </div>
+);
+
+const CostRow = ({ label, value }: { label: string; value: number }) => (
+  <div className="flex justify-between items-baseline p-2 rounded-lg bg-muted/30">
+    <span className="text-xs text-muted-foreground">{label}</span>
+    <span className="text-sm font-bold text-foreground">R$ {value?.toLocaleString("pt-BR")}</span>
   </div>
 );
 
