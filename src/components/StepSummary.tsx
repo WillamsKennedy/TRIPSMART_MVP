@@ -143,7 +143,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       });
       if (error) throw error;
       if (result?.data) {
-        setItineraryData(result.data);
+        // n8n returns array with one rich itinerary object; extract days
+        const raw = Array.isArray(result.data) ? result.data[0] : result.data;
+        const days = raw?.days || raw;
+        setItineraryData(Array.isArray(days) ? days : [raw]);
         toast({ title: "Roteiro gerado! 🤖" });
       } else {
         toast({
