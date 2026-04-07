@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Star, MapPin, Navigation } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import StarRating from "@/components/StarRating";
 import type { AccommodationDetail, TouristSpot } from "@/types/travel";
 
 interface StepAccommodationProps {
@@ -43,9 +44,11 @@ const StepAccommodation = ({
   const { toast } = useToast();
   const [accommodations, setAccommodations] = useState<AccommodationDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [avgRatings, setAvgRatings] = useState<Record<string, { avg: number; count: number }>>({});
 
   useEffect(() => {
     fetchAccommodations();
+    fetchAvgRatings();
   }, [cityId]);
 
   const fetchAccommodations = async () => {
@@ -76,6 +79,22 @@ const StepAccommodation = ({
       setAccommodations([]);
     }
     setLoading(false);
+  };
+
+  const fetchAvgRatings = async () => {
+    const { data } = await supabase.from("accommodation_reviews" as any).select("accommodation_name, score").eq("city_id", cityId);
+    if (data && Array.isArray(data)) {
+      const map: Record<string, number[]> = {};
+      (data as any[]).forEach((r: any) => {
+        if (!map[r.accommodation_name]) map[r.accommodation_name] = [];
+        map[r.accommodation_name].push(r.score);
+      });
+      const result: Record<string, { avg: number; count: number }> = {};
+      Object.entries(map).forEach(([name, scores]) => {
+        result[name] = { avg: scores.reduce((a, b) => a + b, 0) / scores.length, count: scores.length };
+      });
+      setAvgRatings(result);
+    }
   };
 
   // Calculate distance from accommodation to the main (first) selected spot
@@ -127,6 +146,8 @@ const StepAccommodation = ({
             const distKm = getDistanceToMainSpot(acc);
             const totalCost = acc.pricePerNight * days;
             const withinBudget = totalCost <= remainingBudget;
+            const userRating = avgRatings[acc.name];
+            const withinBudget = totalCost <= remainingBudget;
             return (
               <motion.button
                 key={acc.id || i}
@@ -172,6 +193,12 @@ const StepAccommodation = ({
                     </span>
                   )}
                   {!withinBudget && <span className="text-xs font-bold text-destructive">⚠ Acima do orçamento</span>}
+                  {userRating && (
+                    <span className="flex items-center gap-1 text-sm">
+                      <StarRating value={userRating.avg} readOnly size={12} showValue />
+                      <span className="text-xs text-muted-foreground">({userRating.count})</span>
+                    </span>
+                  )}
                 </div>
               </motion.button>
             );
