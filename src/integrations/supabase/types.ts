@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      accommodation_reviews: {
+        Row: {
+          accommodation_name: string
+          city_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          accommodation_name: string
+          city_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score: number
+          user_id: string
+        }
+        Update: {
+          accommodation_name?: string
+          city_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      activity_reviews: {
+        Row: {
+          activity_name: string
+          city_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          activity_name: string
+          city_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score: number
+          user_id: string
+        }
+        Update: {
+          activity_name?: string
+          city_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       itinerary_comments: {
         Row: {
           content: string
