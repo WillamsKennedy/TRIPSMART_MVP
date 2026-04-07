@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Search, Star, Check, Loader2 } from "lucide-react";
 import { pernambucoCities, monthNames, categoryLabels } from "@/data/mockData";
 import { supabase } from "@/integrations/supabase/client";
+import StarRating from "@/components/StarRating";
 import type { TouristSpot, CityData } from "@/types/travel";
 
 interface StepCityProps {
@@ -39,7 +40,7 @@ const StepCity = ({
   const [catFilter, setCatFilter] = useState("Todos");
   const [spots, setSpots] = useState<TouristSpot[]>([]);
   const [loadingSpots, setLoadingSpots] = useState(false);
-
+  const [activityAvgRatings, setActivityAvgRatings] = useState<Record<string, { avg: number; count: number }>>({});
   const filteredCities = useMemo(() => {
     return pernambucoCities.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
   }, [search]);
@@ -75,6 +76,20 @@ const StepCity = ({
       // silently handle fetch errors
     }
     setLoadingSpots(false);
+    // Fetch avg ratings for this city
+    const { data: reviews } = await supabase.from("activity_reviews" as any).select("activity_name, score").eq("city_id", city.id);
+    if (reviews && Array.isArray(reviews)) {
+      const map: Record<string, number[]> = {};
+      (reviews as any[]).forEach((r: any) => {
+        if (!map[r.activity_name]) map[r.activity_name] = [];
+        map[r.activity_name].push(r.score);
+      });
+      const result: Record<string, { avg: number; count: number }> = {};
+      Object.entries(map).forEach(([name, scores]) => {
+        result[name] = { avg: scores.reduce((a, b) => a + b, 0) / scores.length, count: scores.length };
+      });
+      setActivityAvgRatings(result);
+    }
   };
 
   // Auto-open if pre-selected
@@ -263,6 +278,12 @@ const StepCity = ({
                               <Star size={12} className="text-primary fill-primary" />
                               <span className="font-bold text-foreground">{spot.rating}</span>
                             </span>
+                            {activityAvgRatings[spot.name] && (
+                              <span className="flex items-center gap-1 text-xs">
+                                <StarRating value={activityAvgRatings[spot.name].avg} readOnly size={10} showValue={false} />
+                                <span className="text-muted-foreground">({activityAvgRatings[spot.name].count})</span>
+                              </span>
+                            )}
                             {spot.category && (
                               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-accent/10 text-accent">
                                 {categoryLabels[spot.category]}
