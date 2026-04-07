@@ -195,7 +195,7 @@ const StepCity = ({
               {selectedCity?.imageEmoji} {selectedCity?.name}
             </SheetTitle>
             <p className="text-sm text-muted-foreground">
-              Atividades serão trazidas pelo n8n
+              Atividades
               {month && (
                 <>
                   {" "}
