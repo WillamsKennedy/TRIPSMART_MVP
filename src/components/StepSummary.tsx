@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, MapPin, Clock, DollarSign, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Navigation, Info, Instagram, Phone } from "lucide-react";
+import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, MapPin, Clock, DollarSign, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Navigation, Info, Instagram, Phone, MessageSquare } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import TravelMap from "@/components/TravelMap";
+import StarRating from "@/components/StarRating";
 import { monthNames, transportOptions, localTransportOptions } from "@/data/mockData";
 import type { TravelState } from "@/types/travel";
 import type { RichItinerary, RichDay, RichActivity, AttractionZone, AttractionHighlight } from "@/types/richItinerary";
@@ -27,6 +28,13 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const [expandedZones, setExpandedZones] = useState<Record<number, boolean>>({});
   const [expandedHighlights, setExpandedHighlights] = useState<Record<string, boolean>>({});
 
+  // Review state
+  const [activityRatings, setActivityRatings] = useState<Record<string, number>>({});
+  const [activityComments, setActivityComments] = useState<Record<string, string>>({});
+  const [accommodationRating, setAccommodationRating] = useState(0);
+  const [accommodationComment, setAccommodationComment] = useState("");
+  const [savingReview, setSavingReview] = useState<string | null>(null);
+
   const transportLabel =
     transportOptions.find((t) => t.id === data.transportToDestination)?.label || data.transportToDestination;
   const localTransportLabel =
@@ -34,6 +42,69 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
   const toggleZone = (i: number) => setExpandedZones((p) => ({ ...p, [i]: !p[i] }));
   const toggleHighlight = (key: string) => setExpandedHighlights((p) => ({ ...p, [key]: !p[key] }));
+
+  // Real cost calculation
+  const realAccommodationCost = data.accommodation ? data.accommodation.pricePerNight * data.days : 0;
+  const realActivitiesCost = data.selectedSpots.reduce((sum, s) => sum + (s.avgCostPerPerson || 0), 0) * data.people;
+
+  const computedCostBreakdown = richItinerary?.costBreakdown
+    ? {
+        accommodation: realAccommodationCost || richItinerary.costBreakdown.accommodation,
+        food: richItinerary.costBreakdown.food,
+        transport: richItinerary.costBreakdown.transport,
+        activities: realActivitiesCost || richItinerary.costBreakdown.activities,
+        extras: richItinerary.costBreakdown.extras,
+      }
+    : null;
+
+  const computedTotal = computedCostBreakdown
+    ? Object.values(computedCostBreakdown).reduce((a, b) => a + b, 0)
+    : richItinerary?.estimatedTotalCost || 0;
+
+  // Save review helpers
+  const saveActivityReview = async (activityName: string) => {
+    if (!user) return;
+    const score = activityRatings[activityName];
+    if (!score) return;
+    setSavingReview(activityName);
+    const { error } = await supabase.from("activity_reviews" as any).upsert(
+      {
+        user_id: user.id,
+        activity_name: activityName,
+        city_id: data.city,
+        score,
+        comment: activityComments[activityName] || null,
+      } as any,
+      { onConflict: "user_id,activity_name,city_id" }
+    );
+    setSavingReview(null);
+    if (error) {
+      toast({ title: "Erro ao salvar avaliação", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Avaliação salva! ⭐" });
+    }
+  };
+
+  const saveAccommodationReview = async () => {
+    if (!user || !data.accommodation || !accommodationRating) return;
+    setSavingReview("accommodation");
+    const { error } = await supabase.from("accommodation_reviews" as any).upsert(
+      {
+        user_id: user.id,
+        accommodation_name: data.accommodation.name,
+        city_id: data.city,
+        score: accommodationRating,
+        comment: accommodationComment || null,
+      } as any,
+      { onConflict: "user_id,accommodation_name,city_id" }
+    );
+    setSavingReview(null);
+    if (error) {
+      toast({ title: "Erro ao salvar avaliação", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Avaliação salva! ⭐" });
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -149,8 +220,8 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         toast({ title: "Roteiro gerado! 🤖" });
       } else {
         toast({
-          title: "Erro: Não foi possível formular o roteiro",
-          description: "Configure o webhook generate-itinerary no n8n.",
+          title: "Não foi possível gerar o roteiro",
+          description: "Tente novamente mais tarde.",
           variant: "destructive",
         });
       }
@@ -224,7 +295,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         )}
 
         {data.accommodation && (
-          <div className="pt-2 border-t border-border">
+          <div className="pt-2 border-t border-border space-y-3">
             <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospedagem</span>
             <div className="mt-1">
               <span className="font-bold text-foreground">{data.accommodation.name}</span>
@@ -234,6 +305,27 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
                 {(data.accommodation.pricePerNight * data.days).toLocaleString("pt-BR")}
               </span>
             </div>
+            {/* Accommodation review */}
+            {user && (
+              <div className="p-3 rounded-xl bg-muted/30 space-y-2">
+                <span className="text-xs font-bold text-muted-foreground">Avaliar hospedagem</span>
+                <StarRating value={accommodationRating} onChange={setAccommodationRating} size={20} />
+                <textarea
+                  placeholder="Comentário (opcional)"
+                  value={accommodationComment}
+                  onChange={(e) => setAccommodationComment(e.target.value)}
+                  className="w-full bg-background border border-border rounded-lg p-2 text-sm text-foreground placeholder:text-muted-foreground resize-none h-16"
+                />
+                <Button
+                  size="sm"
+                  disabled={!accommodationRating || savingReview === "accommodation"}
+                  onClick={saveAccommodationReview}
+                  className="rounded-full text-xs gap-1"
+                >
+                  <MessageSquare size={12} /> {savingReview === "accommodation" ? "Salvando..." : "Enviar avaliação"}
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
@@ -301,42 +393,73 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
                   {/* Activities timeline */}
                   <div className="mt-4 space-y-3 border-l-2 border-primary/20 pl-4 ml-2">
-                    {day.activities?.map((act: RichActivity, j: number) => (
-                      <div key={j} className="relative">
-                        <div className="absolute -left-[22px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">{act.time}</span>
-                            <span className="text-xs text-muted-foreground">{act.period}</span>
-                            {act.duration && <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock size={10} />{act.duration}</span>}
+                    {day.activities?.map((act: RichActivity, j: number) => {
+                      const actKey = `${act.title}-${day.day}`;
+                      return (
+                        <div key={j} className="relative">
+                          <div className="absolute -left-[22px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">{act.time}</span>
+                              <span className="text-xs text-muted-foreground">{act.period}</span>
+                              {act.duration && <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock size={10} />{act.duration}</span>}
+                            </div>
+                            <h5 className="font-bold text-foreground text-sm">{act.title}</h5>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{act.description}</p>
+                            <div className="flex flex-wrap gap-3 mt-1">
+                              {act.location && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <MapPin size={10} className="text-primary" /> {act.location}
+                                </span>
+                              )}
+                              {act.transport && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <Navigation size={10} className="text-primary" /> {act.transport}
+                                </span>
+                              )}
+                              {act.estimatedCost > 0 && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <DollarSign size={10} className="text-primary" /> R$ {act.estimatedCost}
+                                </span>
+                              )}
+                            </div>
+                            {act.tips && (
+                              <p className="text-xs text-primary/80 mt-1 flex items-start gap-1">
+                                <Lightbulb size={10} className="mt-0.5 shrink-0" /> {act.tips}
+                              </p>
+                            )}
+                            {/* Activity rating */}
+                            {user && (
+                              <div className="mt-2 p-2 rounded-lg bg-muted/20 space-y-1">
+                                <StarRating
+                                  value={activityRatings[act.title] || 0}
+                                  onChange={(v) => setActivityRatings((p) => ({ ...p, [act.title]: v }))}
+                                  size={14}
+                                />
+                                <div className="flex gap-2">
+                                  <input
+                                    type="text"
+                                    placeholder="Comentário..."
+                                    value={activityComments[act.title] || ""}
+                                    onChange={(e) => setActivityComments((p) => ({ ...p, [act.title]: e.target.value }))}
+                                    className="flex-1 bg-background border border-border rounded px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    disabled={!activityRatings[act.title] || savingReview === act.title}
+                                    onClick={() => saveActivityReview(act.title)}
+                                    className="text-xs h-7 px-2"
+                                  >
+                                    {savingReview === act.title ? "..." : "Avaliar"}
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          <h5 className="font-bold text-foreground text-sm">{act.title}</h5>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{act.description}</p>
-                          <div className="flex flex-wrap gap-3 mt-1">
-                            {act.location && (
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <MapPin size={10} className="text-primary" /> {act.location}
-                              </span>
-                            )}
-                            {act.transport && (
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Navigation size={10} className="text-primary" /> {act.transport}
-                              </span>
-                            )}
-                            {act.estimatedCost > 0 && (
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                <DollarSign size={10} className="text-primary" /> R$ {act.estimatedCost}
-                              </span>
-                            )}
-                          </div>
-                          {act.tips && (
-                            <p className="text-xs text-primary/80 mt-1 flex items-start gap-1">
-                              <Lightbulb size={10} className="mt-0.5 shrink-0" /> {act.tips}
-                            </p>
-                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
@@ -442,22 +565,22 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
               </div>
             )}
 
-            {/* Cost Breakdown */}
-            {richItinerary.costBreakdown && (
+            {/* Cost Breakdown – real values */}
+            {computedCostBreakdown && (
               <div className="p-5 rounded-2xl border border-border bg-card space-y-3" style={{ boxShadow: "var(--card-shadow)" }}>
                 <h4 className="font-extrabold text-foreground flex items-center gap-2">
                   <DollarSign size={18} className="text-primary" /> Estimativa de custos
                 </h4>
                 <div className="grid grid-cols-2 gap-2">
-                  <CostRow label="Hospedagem" value={richItinerary.costBreakdown.accommodation} />
-                  <CostRow label="Alimentação" value={richItinerary.costBreakdown.food} />
-                  <CostRow label="Transporte" value={richItinerary.costBreakdown.transport} />
-                  <CostRow label="Atividades" value={richItinerary.costBreakdown.activities} />
-                  <CostRow label="Extras" value={richItinerary.costBreakdown.extras} />
+                  <CostRow label="Hospedagem" value={computedCostBreakdown.accommodation} />
+                  <CostRow label="Alimentação" value={computedCostBreakdown.food} />
+                  <CostRow label="Transporte" value={computedCostBreakdown.transport} />
+                  <CostRow label="Atividades" value={computedCostBreakdown.activities} />
+                  <CostRow label="Extras" value={computedCostBreakdown.extras} />
                 </div>
                 <div className="pt-3 border-t border-border flex justify-between">
                   <span className="font-bold text-foreground">Total estimado</span>
-                  <span className="font-extrabold text-primary text-lg">R$ {richItinerary.estimatedTotalCost?.toLocaleString("pt-BR")}</span>
+                  <span className="font-extrabold text-primary text-lg">R$ {computedTotal.toLocaleString("pt-BR")}</span>
                 </div>
               </div>
             )}

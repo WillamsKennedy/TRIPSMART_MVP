@@ -49,8 +49,7 @@ const StepCity = ({
     return spots.filter((s) => s.category === catFilter);
   }, [spots, catFilter]);
 
-  // Fetch spots from n8n when a city is selected
-  const fetchSpotsFromN8n = async (city: CityData) => {
+  const fetchSpots = async (city: CityData) => {
     setLoadingSpots(true);
     setSpots([]);
     try {
@@ -73,7 +72,7 @@ const StepCity = ({
         setSpots(data.data);
       }
     } catch {
-      // n8n not configured yet
+      // silently handle fetch errors
     }
     setLoadingSpots(false);
   };
@@ -85,7 +84,7 @@ const StepCity = ({
       if (city) {
         setSelectedCity(city);
         setSheetOpen(true);
-        fetchSpotsFromN8n(city);
+        fetchSpots(city);
       }
     }
   }, [preSelectedCity]);
@@ -108,7 +107,7 @@ const StepCity = ({
     setSelectedSpots([]);
     setCatFilter("Todos");
     setSheetOpen(true);
-    fetchSpotsFromN8n(city);
+    fetchSpots(city);
   };
 
   const handleConfirmSpots = () => {
@@ -230,10 +229,8 @@ const StepCity = ({
               </div>
             ) : filteredSpots.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-muted-foreground mb-2">Nenhuma atividade retornada.</p>
-                <p className="text-xs text-primary font-semibold">
-                  Configure o webhook <code>get-tourist-spots</code> no n8n.
-                </p>
+                <p className="text-muted-foreground mb-2">Não foi possível carregar as atividades.</p>
+                <p className="text-xs text-primary font-semibold">Tente novamente mais tarde.</p>
               </div>
             ) : (
               filteredSpots.map((spot) => {
