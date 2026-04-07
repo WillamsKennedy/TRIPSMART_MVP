@@ -147,7 +147,6 @@ const StepAccommodation = ({
             const totalCost = acc.pricePerNight * days;
             const withinBudget = totalCost <= remainingBudget;
             const userRating = avgRatings[acc.name];
-            const withinBudget = totalCost <= remainingBudget;
             return (
               <motion.button
                 key={acc.id || i}
