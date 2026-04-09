@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, MapPin, Navigation } from "lucide-react";
+import { Star, MapPin, Navigation, HelpCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/StarRating";
@@ -135,11 +135,30 @@ const StepAccommodation = ({
       </div>
 
       <div className="grid gap-4 w-full max-w-lg">
+        {/* Ainda não sei */}
+        <motion.button
+          whileHover={{ y: -4 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onNext({ id: "undecided", name: "Ainda não definida", type: "Indefinido", address: "", pricePerNight: 0, rating: 0, lat: 0, lng: 0, safetyScore: 0, distanceToSpots: 0 })}
+          aria-label="Ainda não sei onde vou ficar"
+          className="p-5 rounded-2xl border border-dashed border-muted-foreground/40 bg-muted/30 text-left hover:border-primary/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <div className="flex items-center gap-4">
+            <HelpCircle size={28} className="text-muted-foreground" />
+            <div>
+              <span className="font-bold text-muted-foreground block">Ainda não sei</span>
+              <span className="text-sm text-muted-foreground">Decido a hospedagem depois</span>
+            </div>
+          </div>
+        </motion.button>
+
         {loading ? (
-          <p className="text-center py-8 text-muted-foreground">Buscando hospedagens...</p>
+          <div className="text-center py-8" role="status" aria-live="polite">
+            <p className="text-muted-foreground">Buscando hospedagens...</p>
+          </div>
         ) : accommodations.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground mb-4">Erro: Não foi possivel encontrar hospedagens, tente novamente.</p>
+          <div className="text-center py-8" role="alert">
+            <p className="text-muted-foreground mb-4">Não foi possível encontrar hospedagens. Tente novamente.</p>
           </div>
         ) : (
           accommodations.map((acc, i) => {

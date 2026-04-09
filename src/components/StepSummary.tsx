@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, MapPin, Clock, DollarSign, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Navigation, Info, Instagram, Phone, MessageSquare } from "lucide-react";
+import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, MapPin, Clock, DollarSign, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Navigation, Info, Instagram, Phone, MessageSquare, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -27,7 +27,8 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const [richItinerary, setRichItinerary] = useState<RichItinerary | null>(null);
   const [expandedZones, setExpandedZones] = useState<Record<number, boolean>>({});
   const [expandedHighlights, setExpandedHighlights] = useState<Record<string, boolean>>({});
-
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const itineraryRef = useRef<HTMLDivElement>(null);
   // Review state
   const [activityRatings, setActivityRatings] = useState<Record<string, number>>({});
   const [activityComments, setActivityComments] = useState<Record<string, string>>({});
@@ -233,7 +234,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
   const openGoogleMaps = () => {
     const points: string[] = [];
-    if (data.accommodation) points.push(`${data.accommodation.lat},${data.accommodation.lng}`);
+    if (data.accommodation && data.accommodation.id !== "undecided") points.push(`${data.accommodation.lat},${data.accommodation.lng}`);
     data.selectedSpots.forEach((s) => points.push(`${s.lat},${s.lng}`));
     if (points.length === 0) return;
     if (points.length === 1) {
@@ -246,6 +247,38 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&waypoints=${waypoints}&travelmode=walking`, '_blank', 'noopener,noreferrer');
   };
 
+  const exportToPdf = async () => {
+    if (!itineraryRef.current) return;
+    setExportingPdf(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+      const element = itineraryRef.current;
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 10;
+      pdf.addImage(imgData, "JPEG", 10, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight - 20;
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 10, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight - 20;
+      }
+      pdf.save(`roteiro-${data.cityName.toLowerCase().replace(/\s/g, "-")}-${data.days}dias.pdf`);
+      toast({ title: "PDF exportado! 📄" });
+    } catch (e: any) {
+      toast({ title: "Erro ao exportar PDF", description: e.message, variant: "destructive" });
+    }
+    setExportingPdf(false);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -253,7 +286,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col items-center gap-8 w-full"
+      role="main"
+      aria-label="Resumo do roteiro"
     >
+      <div ref={itineraryRef} className="flex flex-col items-center gap-8 w-full">
       <div className="w-16 h-16 rounded-full gradient-pe flex items-center justify-center">
         <Check size={32} className="text-primary-foreground" />
       </div>
@@ -277,8 +313,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         )}
         <SummaryRow label="Quartos" value={`${data.rooms}`} />
         <SummaryRow label="Duração" value={`${data.days} dia${data.days > 1 ? "s" : ""}`} />
-        {data.month && <SummaryRow label="Mês" value={monthNames[data.month - 1]} />}
-        {data.transportToDestination && <SummaryRow label="Transporte ida" value={transportLabel || ""} />}
+        {data.month && data.month > 0 && <SummaryRow label="Mês" value={monthNames[data.month - 1]} />}
+        {data.month === 0 && <SummaryRow label="Mês" value="Ainda não definido" />}
+        {data.transportToDestination && data.transportToDestination !== "undecided" && <SummaryRow label="Transporte ida" value={transportLabel || ""} />}
+        {data.transportToDestination === "undecided" && <SummaryRow label="Transporte ida" value="Ainda não definido" />}
         <SummaryRow label="Destino" value={`${data.cityName}, Pernambuco`} />
 
         {data.selectedSpots.length > 0 && (
@@ -294,7 +332,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           </div>
         )}
 
-        {data.accommodation && (
+        {data.accommodation && data.accommodation.id !== "undecided" && (
           <div className="pt-2 border-t border-border space-y-3">
             <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospedagem</span>
             <div className="mt-1">
@@ -329,7 +367,9 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           </div>
         )}
 
-        {data.localTransport && <SummaryRow label="Transporte local" value={localTransportLabel || ""} />}
+        {data.localTransport && data.localTransport !== "undecided" && <SummaryRow label="Transporte local" value={localTransportLabel || ""} />}
+        {data.localTransport === "undecided" && <SummaryRow label="Transporte local" value="Ainda não definido" />}
+        {data.accommodation?.id === "undecided" && <SummaryRow label="Hospedagem" value="Ainda não definida" />}
       </div>
 
       {/* Map */}
@@ -599,8 +639,15 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         )}
       </div>
 
+      </div>{/* close itineraryRef wrapper */}
+
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md" role="group" aria-label="Ações do roteiro">
+        {richItinerary && (
+          <Button onClick={exportToPdf} disabled={exportingPdf} variant="outline" className="flex-1 rounded-full font-bold gap-2">
+            <FileDown size={16} /> {exportingPdf ? "Exportando..." : "Exportar PDF"}
+          </Button>
+        )}
         {!saved && !shared && (
           <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2">
             <Save size={16} /> {saving ? "Salvando..." : "Salvar no histórico"}
@@ -612,7 +659,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           </Button>
         )}
         {(saved || shared) && (
-          <p className="text-sm text-center text-muted-foreground w-full">
+          <p className="text-sm text-center text-muted-foreground w-full" role="status">
             ✅ {shared ? "Compartilhado na comunidade e salvo no histórico" : "Salvo no histórico"}
           </p>
         )}
