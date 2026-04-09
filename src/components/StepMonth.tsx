@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Calendar } from "lucide-react";
+import { Calendar, HelpCircle } from "lucide-react";
 import { monthNames, monthEmojis } from "@/data/mockData";
 
 interface StepMonthProps {
@@ -16,16 +16,18 @@ const StepMonth = ({ onNext }: StepMonthProps) => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col items-center gap-8"
+      role="region"
+      aria-label="Seleção do mês de viagem"
     >
       <div className="text-center space-y-2">
-        <Calendar size={32} className="mx-auto text-primary" />
+        <Calendar size={32} className="mx-auto text-primary" aria-hidden="true" />
         <h2 className="text-3xl md:text-4xl font-extrabold tracking-display text-foreground">
           Quando quer viajar?
         </h2>
         <p className="text-muted-foreground text-lg">Selecione o mês de partida</p>
       </div>
 
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-3 w-full max-w-lg">
+      <div className="grid grid-cols-3 md:grid-cols-4 gap-3 w-full max-w-lg" role="group" aria-label="Meses disponíveis">
         {monthNames.map((name, i) => {
           const monthNum = i + 1;
           const isCurrent = monthNum === currentMonth;
@@ -35,14 +37,15 @@ const StepMonth = ({ onNext }: StepMonthProps) => {
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onNext(monthNum)}
-              className={`relative p-4 rounded-2xl border text-center transition-all ${
+              aria-label={`${name}${isCurrent ? ' (mês atual)' : ''}`}
+              className={`relative p-4 rounded-2xl border text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                 isCurrent
                   ? 'border-primary bg-primary/10 shadow-md'
                   : 'border-border bg-card hover:border-primary/40'
               }`}
               style={{ boxShadow: isCurrent ? undefined : 'var(--card-shadow)' }}
             >
-              <span className="text-2xl block">{monthEmojis[i]}</span>
+              <span className="text-2xl block" aria-hidden="true">{monthEmojis[i]}</span>
               <span className="text-sm font-bold text-foreground block mt-1">{name}</span>
               {isCurrent && (
                 <span className="absolute -top-2 -right-2 text-[10px] font-bold px-2 py-0.5 rounded-full gradient-pe text-primary-foreground">
@@ -52,6 +55,18 @@ const StepMonth = ({ onNext }: StepMonthProps) => {
             </motion.button>
           );
         })}
+
+        {/* Ainda não sei */}
+        <motion.button
+          whileHover={{ y: -4 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => onNext(0)}
+          aria-label="Ainda não sei o mês"
+          className="relative p-4 rounded-2xl border border-dashed border-muted-foreground/40 text-center transition-all bg-muted/30 hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <HelpCircle size={24} className="mx-auto text-muted-foreground" aria-hidden="true" />
+          <span className="text-sm font-bold text-muted-foreground block mt-1">Ainda não sei</span>
+        </motion.button>
       </div>
     </motion.div>
   );
