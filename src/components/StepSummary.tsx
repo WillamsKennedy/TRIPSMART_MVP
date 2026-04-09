@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, MapPin, Clock, DollarSign, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Navigation, Info, Instagram, Phone, MessageSquare } from "lucide-react";
+import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, MapPin, Clock, DollarSign, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Navigation, Info, Instagram, Phone, MessageSquare, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -27,7 +27,8 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const [richItinerary, setRichItinerary] = useState<RichItinerary | null>(null);
   const [expandedZones, setExpandedZones] = useState<Record<number, boolean>>({});
   const [expandedHighlights, setExpandedHighlights] = useState<Record<string, boolean>>({});
-
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const itineraryRef = useRef<HTMLDivElement>(null);
   // Review state
   const [activityRatings, setActivityRatings] = useState<Record<string, number>>({});
   const [activityComments, setActivityComments] = useState<Record<string, string>>({});
@@ -233,7 +234,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
   const openGoogleMaps = () => {
     const points: string[] = [];
-    if (data.accommodation) points.push(`${data.accommodation.lat},${data.accommodation.lng}`);
+    if (data.accommodation && data.accommodation.id !== "undecided") points.push(`${data.accommodation.lat},${data.accommodation.lng}`);
     data.selectedSpots.forEach((s) => points.push(`${s.lat},${s.lng}`));
     if (points.length === 0) return;
     if (points.length === 1) {
@@ -244,6 +245,38 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     const dest = points[points.length - 1];
     const waypoints = points.slice(1, -1).join("|");
     window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&waypoints=${waypoints}&travelmode=walking`, '_blank', 'noopener,noreferrer');
+  };
+
+  const exportToPdf = async () => {
+    if (!itineraryRef.current) return;
+    setExportingPdf(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+      const element = itineraryRef.current;
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 10;
+      pdf.addImage(imgData, "JPEG", 10, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight - 20;
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 10, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight - 20;
+      }
+      pdf.save(`roteiro-${data.cityName.toLowerCase().replace(/\s/g, "-")}-${data.days}dias.pdf`);
+      toast({ title: "PDF exportado! 📄" });
+    } catch (e: any) {
+      toast({ title: "Erro ao exportar PDF", description: e.message, variant: "destructive" });
+    }
+    setExportingPdf(false);
   };
 
   return (
