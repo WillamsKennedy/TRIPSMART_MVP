@@ -635,8 +635,15 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         )}
       </div>
 
+      </div>{/* close itineraryRef wrapper */}
+
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md" role="group" aria-label="Ações do roteiro">
+        {richItinerary && (
+          <Button onClick={exportToPdf} disabled={exportingPdf} variant="outline" className="flex-1 rounded-full font-bold gap-2">
+            <FileDown size={16} /> {exportingPdf ? "Exportando..." : "Exportar PDF"}
+          </Button>
+        )}
         {!saved && !shared && (
           <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2">
             <Save size={16} /> {saving ? "Salvando..." : "Salvar no histórico"}
@@ -648,7 +655,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           </Button>
         )}
         {(saved || shared) && (
-          <p className="text-sm text-center text-muted-foreground w-full">
+          <p className="text-sm text-center text-muted-foreground w-full" role="status">
             ✅ {shared ? "Compartilhado na comunidade e salvo no histórico" : "Salvo no histórico"}
           </p>
         )}
