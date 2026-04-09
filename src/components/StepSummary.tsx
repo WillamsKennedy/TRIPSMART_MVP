@@ -286,7 +286,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col items-center gap-8 w-full"
+      role="main"
+      aria-label="Resumo do roteiro"
     >
+      <div ref={itineraryRef} className="flex flex-col items-center gap-8 w-full">
       <div className="w-16 h-16 rounded-full gradient-pe flex items-center justify-center">
         <Check size={32} className="text-primary-foreground" />
       </div>
