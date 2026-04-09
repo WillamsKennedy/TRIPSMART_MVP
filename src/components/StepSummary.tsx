@@ -313,8 +313,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         )}
         <SummaryRow label="Quartos" value={`${data.rooms}`} />
         <SummaryRow label="Duração" value={`${data.days} dia${data.days > 1 ? "s" : ""}`} />
-        {data.month && <SummaryRow label="Mês" value={monthNames[data.month - 1]} />}
-        {data.transportToDestination && <SummaryRow label="Transporte ida" value={transportLabel || ""} />}
+        {data.month && data.month > 0 && <SummaryRow label="Mês" value={monthNames[data.month - 1]} />}
+        {data.month === 0 && <SummaryRow label="Mês" value="Ainda não definido" />}
+        {data.transportToDestination && data.transportToDestination !== "undecided" && <SummaryRow label="Transporte ida" value={transportLabel || ""} />}
+        {data.transportToDestination === "undecided" && <SummaryRow label="Transporte ida" value="Ainda não definido" />}
         <SummaryRow label="Destino" value={`${data.cityName}, Pernambuco`} />
 
         {data.selectedSpots.length > 0 && (
@@ -330,7 +332,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           </div>
         )}
 
-        {data.accommodation && (
+        {data.accommodation && data.accommodation.id !== "undecided" && (
           <div className="pt-2 border-t border-border space-y-3">
             <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Hospedagem</span>
             <div className="mt-1">
