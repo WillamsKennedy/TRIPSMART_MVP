@@ -367,7 +367,9 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           </div>
         )}
 
-        {data.localTransport && <SummaryRow label="Transporte local" value={localTransportLabel || ""} />}
+        {data.localTransport && data.localTransport !== "undecided" && <SummaryRow label="Transporte local" value={localTransportLabel || ""} />}
+        {data.localTransport === "undecided" && <SummaryRow label="Transporte local" value="Ainda não definido" />}
+        {data.accommodation?.id === "undecided" && <SummaryRow label="Hospedagem" value="Ainda não definida" />}
       </div>
 
       {/* Map */}
