@@ -139,7 +139,7 @@ const StepAccommodation = ({
         <motion.button
           whileHover={{ y: -4 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => onNext({ id: "undecided", name: "Ainda não definida", type: "Indefinido", address: "", pricePerNight: 0, rating: 0, lat: 0, lng: 0 })}
+          onClick={() => onNext({ id: "undecided", name: "Ainda não definida", type: "Indefinido", address: "", pricePerNight: 0, rating: 0, lat: 0, lng: 0, safetyScore: 0, distanceToSpots: 0 })}
           aria-label="Ainda não sei onde vou ficar"
           className="p-5 rounded-2xl border border-dashed border-muted-foreground/40 bg-muted/30 text-left hover:border-primary/40 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
