@@ -97,7 +97,7 @@ export const pernambucoCities: CityData[] = [
     imageEmoji: "🤠",
     lat: -7.9861,
     lng: -38.2956,
-    imageUr1: pernambucoImages.serraTalhada,
+    imageUrl: pernambucoImages.serraTalhada,
   },
   {
     id: "goiana",
@@ -106,7 +106,7 @@ export const pernambucoCities: CityData[] = [
     imageEmoji: "⛪",
     lat: -7.5603,
     lng: -35.0025,
-    imageUr1: pernambucoImages.goiana,
+    imageUrl: pernambucoImages.goiana,
   },
   {
     id: "cabo-santo-agostinho",
@@ -115,7 +115,7 @@ export const pernambucoCities: CityData[] = [
     imageEmoji: "🌊",
     lat: -8.2833,
     lng: -35.03,
-    imageUr1: pernambucoImages.caboSantoAgostinho,
+    imageUrl: pernambucoImages.caboSantoAgostinho,
   },
   {
     id: "tamandare",
@@ -124,7 +124,7 @@ export const pernambucoCities: CityData[] = [
     imageEmoji: "🏝️",
     lat: -8.7588,
     lng: -35.1042,
-    imageUr1: pernambucoImages.tamandare,
+    imageUrl: pernambucoImages.tamandare,
   },
 ];
 
