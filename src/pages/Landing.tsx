@@ -33,7 +33,7 @@ const featuredDestinations = [
   {
     name: "Recife",
     cityId: "recife",
-    image: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/00/2e/31/recife.jpg?w=600&h=400&s=1",
+    image: "img",
     tag: "Capital",
     color: "bg-pe-blue",
     desc: "Marco Zero, Brennand e praias urbanas",
