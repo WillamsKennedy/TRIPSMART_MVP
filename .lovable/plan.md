@@ -1,45 +1,41 @@
 
 
-## Plano: Avaliações, Custos Reais e Remoção de Menções ao n8n
+## Plano: Mobile, roteiro automático, avaliações no histórico, estado do planner e hotéis com link/avaliações
 
-### 1. Criar tabelas de avaliação para hospedagens e atividades
+### 1. Ajustes mobile
 
-Duas novas tabelas no banco de dados:
+- **Planner.tsx**: Navbar mais compacta em mobile (padding menor, logo menor). BudgetBar visível em mobile (atualmente `hidden sm:block`).
+- **StepSummary.tsx**: Cards de custo em coluna única em mobile (`grid-cols-1` em vez de `grid-cols-2`). Botões de ação empilhados. Timeline com padding reduzido. Textos menores em mobile.
+- **StepAccommodation.tsx**: Cards de hospedagem com layout empilhado (preço abaixo do nome em mobile).
+- **TravelHistory.tsx**: Grid `grid-cols-1` em mobile (já está OK). Sheet full-width em mobile.
 
-- **`accommodation_reviews`**: `id`, `user_id`, `accommodation_name`, `city_id`, `score` (1-5), `comment`, `created_at`
-- **`activity_reviews`**: `id`, `user_id`, `activity_name`, `city_id`, `score` (1-5), `comment`, `created_at`
+### 2. Gerar roteiro automaticamente ao chegar no summary
 
-Ambas com RLS: qualquer autenticado pode ler, apenas o próprio usuário pode inserir/atualizar sua avaliação.
+- **StepSummary.tsx**: Adicionar `useEffect` que chama `generateItinerary()` automaticamente ao montar o componente, removendo o botão "Gerar roteiro com IA" e o bloco de fallback. Exibir um skeleton/loading enquanto carrega.
 
-### 2. Adicionar UI de avaliação
+### 3. Avaliação no histórico
 
-- **StepSummary.tsx**: Após o roteiro ser gerado/exibido, cada atividade e a hospedagem selecionada terão um componente de estrelas (1-5) clicável + campo de comentário opcional. As avaliações são salvas no banco ao clicar.
-- **StepAccommodation.tsx**: Exibir a média de avaliações de outros usuários em cada hospedagem (se houver dados no banco).
-- **StepCity.tsx**: Exibir a média de avaliações de outros usuários em cada atividade (se houver dados no banco).
+- **TravelHistory.tsx**: No Sheet de detalhes, adicionar seção de avaliação para cada ponto turístico e hospedagem (usando `StarRating`). Buscar avaliações existentes do usuário ao abrir o detalhe. Permitir salvar/atualizar avaliações.
 
-### 3. Estimativa de custos real via n8n
+### 4. Persistir estado do planner e opção "continuar de onde parou"
 
-Atualmente o `costBreakdown` vem do JSON gerado pelo n8n no `generate-itinerary`. O plano é:
+- **Planner.tsx**: Salvar `data` e `step` no `sessionStorage` a cada mudança. Ao clicar no logo/voltar para home, navegar normalmente.
+- **Landing.tsx / Index**: Ao detectar estado salvo no sessionStorage, mostrar um banner/botão "Continuar planejamento" que redireciona para `/planejar` restaurando o estado.
+- **Planner.tsx**: No `useEffect` inicial, verificar sessionStorage e restaurar `data`/`step` se existir. Limpar sessionStorage ao completar (salvar/compartilhar) ou ao clicar "Nova viagem".
 
-- Garantir que o `generate-itinerary` do n8n já retorne `costBreakdown` com valores baseados nos parâmetros reais (orçamento, dias, pessoas, hospedagem selecionada).
-- No frontend, **substituir** os valores de hospedagem do `costBreakdown` pelo custo real calculado (`pricePerNight * days`), e somar os `avgCostPerPerson` das atividades selecionadas × pessoas. Assim a estimativa é híbrida: dados reais do planejamento + estimativas do n8n para alimentação/extras.
+### 5. Hotéis com link de reserva e avaliações de hóspedes
 
-### 4. Remover todas as menções a "n8n" no frontend
+- **StepAccommodation.tsx**: Adicionar campo `bookingUrl` ao card de hospedagem. Se o n8n retornar `bookingUrl`, exibir botão "Reservar" com link externo. As avaliações de hóspedes já estão implementadas (avgRatings). Garantir que apareçam de forma mais proeminente.
+- **Tipo `AccommodationDetail`** em `travel.ts`: Adicionar campo opcional `bookingUrl?: string`.
 
-Arquivos afetados e mudanças:
+### Arquivos a editar
 
-| Arquivo | Mudança |
+| Arquivo | Mudanças |
 |---|---|
-| `StepCity.tsx` | Renomear `fetchSpotsFromN8n` → `fetchSpots`. Remover comentário "n8n not configured yet". Trocar mensagem "Configure o webhook get-tourist-spots no n8n" → "Não foi possível carregar as atividades. Tente novamente." |
-| `StepSummary.tsx` | Trocar mensagem "Configure o webhook generate-itinerary no n8n." → "Não foi possível gerar o roteiro. Tente novamente mais tarde." |
-| `StepAccommodation.tsx` | Nenhuma menção visível a n8n (apenas o invoke interno, que permanece como está) |
-
-### 5. Componente reutilizável de avaliação
-
-Criar `src/components/StarRating.tsx` — componente com 5 estrelas clicáveis, exibe a nota atual, permite alterar. Props: `value`, `onChange`, `readOnly`, `size`.
-
-### Resumo dos arquivos a criar/editar
-
-- **Criar**: 1 migration SQL, `src/components/StarRating.tsx`
-- **Editar**: `StepSummary.tsx`, `StepAccommodation.tsx`, `StepCity.tsx`
+| `src/pages/Planner.tsx` | Persistir estado em sessionStorage, restaurar ao montar |
+| `src/pages/Landing.tsx` | Banner "Continuar planejamento" se houver estado salvo |
+| `src/components/StepSummary.tsx` | Auto-gerar roteiro no mount, ajustes mobile |
+| `src/pages/TravelHistory.tsx` | Seção de avaliação com StarRating no Sheet |
+| `src/components/StepAccommodation.tsx` | Link de reserva, layout mobile |
+| `src/types/travel.ts` | Adicionar `bookingUrl` ao `AccommodationDetail` |
 
