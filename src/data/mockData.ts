@@ -2,13 +2,15 @@ import type { TouristSpot, AccommodationDetail, RestaurantDetail, CityData } fro
 
 export const pernambucoImages: Record<string, string> = {
   recife: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/00/2e/31/recife.jpg?w=600&h=400&s=1",
-  olinda: "https://images.unsplash.com/photo-1624638331590-e7e4e5e10024?w=400",
-  noronha: "https://images.unsplash.com/photo-1580060195710-6ea6d306aa36?w=400",
-  "porto-galinhas": "https://images.unsplash.com/photo-1591017403286-fd8493524e1e?w=400",
-  caruaru: "https://images.unsplash.com/photo-1604868432396-e4b94c0c01e3?w=400",
-  gravata: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400",
-  petrolina: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400",
-  garanhuns: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400",
+  olinda: "https://www.maladeaventuras.com/wp-content/uploads/2020/07/igreja-da-se-olinda.jpg",
+  noronha: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQz6MmMbYWYLTPklgIC2Tu3c8wmWpyBh6GsfQ&s",
+  "porto-galinhas": "https://ipojuca.pe.gov.br/wp-content/uploads/2025/03/image-2-1024x665.png",
+  caruaru:
+    "https://s2-g1.glbimg.com/qN-mDE6BadCcSvrlgv6a8ilH12M=/0x0:4160x2773/984x0/smart/filters:strip_icc()/i.s3.glbimg.com/v1/AUTH_59edd422c0c84a879bd37670ae4f538a/internal_photos/bs/2025/M/g/BGea6TTL6OTxioqfowpA/whatsapp-image-2025-01-08-at-17.34.29.jpeg",
+  gravata:
+    "https://conhecer-wp.s3.amazonaws.com/novo/wp-content/uploads/2022/12/24150942/roteiro-gravata-forma-conhecer-1.jpg",
+  petrolina: "https://blog.blablacar.com.br/wp-content/uploads/2024/05/petrolina-ilha-do-fogo.webp",
+  garanhuns: "https://www.voltologo.net/wp-content/uploads/2024/01/garanhuns-pernambuco-dicas.jpg",
 };
 
 export const pernambucoCities: CityData[] = [
