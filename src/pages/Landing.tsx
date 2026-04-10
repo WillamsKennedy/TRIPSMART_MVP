@@ -32,11 +32,19 @@ const Landing = () => {
   const [cityFilter, setCityFilter] = useState("");
   const [searchSpot, setSearchSpot] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [hasSavedPlan, setHasSavedPlan] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 600);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("planner-state");
+      setHasSavedPlan(!!saved);
+    } catch {}
   }, []);
 
   const goToPlanner = (cityId?: string) => {
@@ -98,6 +106,18 @@ const Landing = () => {
           </div>
         </div>
       </nav>
+
+      {/* Resume banner */}
+      {user && hasSavedPlan && (
+        <div className="bg-pe-gold/90 px-4 md:px-6 py-3">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <p className="text-pe-navy font-bold text-sm">📋 Você tem um planejamento em andamento</p>
+            <Button onClick={() => navigate('/planejar')} size="sm" className="bg-pe-navy text-white hover:bg-pe-navy/90 rounded-full text-xs font-bold gap-1.5">
+              <Compass size={14} /> Continuar planejamento
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Hero — Blue background */}
       <section className="relative overflow-hidden bg-pe-blue">
