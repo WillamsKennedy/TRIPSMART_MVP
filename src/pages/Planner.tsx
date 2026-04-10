@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import BudgetBar from "@/components/BudgetBar";
 import StepBudget from "@/components/StepBudget";
-
 import StepMonth from "@/components/StepMonth";
 import StepTransportArrival from "@/components/StepTransportArrival";
 import StepCity from "@/components/StepCity";
@@ -16,6 +15,8 @@ import { ArrowLeft, Navigation } from "lucide-react";
 import type { TravelState, TouristSpot, AccommodationDetail } from "@/types/travel";
 
 type StepName = 'budget' | 'month' | 'transport-arrival' | 'city' | 'accommodation' | 'local-transport' | 'summary';
+
+const STORAGE_KEY = "planner-state";
 
 const initialState: TravelState = {
   budget: 0, budgetLabel: '', people: 1, adults: 1, children: 0, isCouple: false, rooms: 1, days: 3, groupType: "solo",
@@ -30,6 +31,27 @@ const Planner = () => {
   const [step, setStep] = useState<StepName>('budget');
   const [data, setData] = useState<TravelState>(initialState);
   const [preSelectedCity, setPreSelectedCity] = useState<string | undefined>();
+
+  // Restore state from sessionStorage
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.data && parsed.step) {
+          setData(parsed.data);
+          setStep(parsed.step);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Persist state to sessionStorage
+  useEffect(() => {
+    if (step !== 'budget' || data.budget > 0) {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ step, data }));
+    }
+  }, [step, data]);
 
   useEffect(() => { if (!loading && !user) navigate('/auth'); }, [user, loading]);
   useEffect(() => { const c = searchParams.get('city'); if (c) setPreSelectedCity(c); }, [searchParams]);
@@ -50,7 +72,11 @@ const Planner = () => {
   const handleCity = (cityId: string, cityName: string, spots: TouristSpot[]) => { setData(d => ({ ...d, city: cityId, cityName, selectedSpots: spots })); setStep('accommodation'); };
   const handleAccommodation = (accommodation: AccommodationDetail) => { setData(d => ({ ...d, accommodation })); setStep('local-transport'); };
   const handleLocalTransport = (transport: string) => { setData(d => ({ ...d, localTransport: transport })); setStep('summary'); };
-  const handleRestart = () => { setData(initialState); setStep('budget'); };
+  const handleRestart = () => {
+    setData(initialState);
+    setStep('budget');
+    sessionStorage.removeItem(STORAGE_KEY);
+  };
 
   const activeSteps = getSteps();
   const currentIdx = activeSteps.indexOf(step);
@@ -59,19 +85,20 @@ const Planner = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <div className="sticky top-0 z-50 bg-pe-navy border-b border-pe-blue/20 px-6 py-3">
+      <div className="sticky top-0 z-50 bg-pe-navy border-b border-pe-blue/20 px-3 md:px-6 py-2 md:py-3">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => step === 'budget' ? navigate('/') : goBack()} className="gap-2 text-white/80 hover:text-white hover:bg-white/10">
-            <ArrowLeft size={16} /> {step === 'budget' ? 'Voltar' : 'Anterior'}
+          <Button variant="ghost" size="sm" onClick={() => step === 'budget' ? navigate('/') : goBack()} className="gap-1.5 text-white/80 hover:text-white hover:bg-white/10 text-xs md:text-sm px-2 md:px-3">
+            <ArrowLeft size={14} /> <span className="hidden sm:inline">{step === 'budget' ? 'Voltar' : 'Anterior'}</span>
           </Button>
-          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-pe-gold flex items-center justify-center">
-              <Navigation size={14} className="text-pe-navy" />
+          <button onClick={() => navigate('/')} className="flex items-center gap-1.5 md:gap-2 hover:opacity-80 transition-opacity">
+            <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-pe-gold flex items-center justify-center">
+              <Navigation size={12} className="text-pe-navy md:hidden" />
+              <Navigation size={14} className="text-pe-navy hidden md:block" />
             </div>
-            <span className="font-black text-sm text-white">TRIP<span className="text-pe-gold">SMART</span></span>
+            <span className="font-black text-xs md:text-sm text-white">TRIP<span className="text-pe-gold">SMART</span></span>
           </button>
           {data.budget > 0 && (
-            <div className="hidden sm:block w-48">
+            <div className="w-24 sm:w-48">
               <BudgetBar total={data.budget} spent={0} />
             </div>
           )}
@@ -79,14 +106,14 @@ const Planner = () => {
       </div>
 
       {step !== 'summary' && step !== 'budget' && (
-        <div className="flex justify-center items-center gap-1.5 pt-5 pb-3 px-6 overflow-x-auto">
+        <div className="flex justify-center items-center gap-1.5 pt-4 md:pt-5 pb-2 md:pb-3 px-4 md:px-6 overflow-x-auto">
           {activeSteps.map((s, i) => (
-            <div key={s} className={`h-2 rounded-full transition-all flex-shrink-0 ${i <= currentIdx ? 'w-7 bg-pe-gold' : 'w-3 bg-border'}`} />
+            <div key={s} className={`h-1.5 md:h-2 rounded-full transition-all flex-shrink-0 ${i <= currentIdx ? 'w-5 md:w-7 bg-pe-gold' : 'w-2 md:w-3 bg-border'}`} />
           ))}
         </div>
       )}
 
-      <div className="flex-1 flex items-start justify-center px-6 py-10 overflow-y-auto">
+      <div className="flex-1 flex items-start justify-center px-4 md:px-6 py-6 md:py-10 overflow-y-auto">
         <div className="w-full max-w-3xl">
           <AnimatePresence mode="wait">
             {step === 'budget' && <StepBudget key="budget" onNext={handleBudget} />}

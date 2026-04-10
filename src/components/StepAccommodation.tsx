@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Star, MapPin, Navigation, HelpCircle } from "lucide-react";
+import { Star, MapPin, Navigation, HelpCircle, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/StarRating";
@@ -180,22 +180,27 @@ const StepAccommodation = ({
                 }`}
                 style={{ boxShadow: "var(--card-shadow)" }}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-3">
                   <div className="flex-1">
                     <span className="text-xs font-bold uppercase tracking-widest text-primary">{acc.type}</span>
-                    <h3 className="text-lg font-bold text-card-foreground mt-1">{acc.name}</h3>
+                    <h3 className="text-base md:text-lg font-bold text-card-foreground mt-1">{acc.name}</h3>
                     <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin size={12} /> {acc.address}
                     </p>
                   </div>
-                  <div className="text-right flex-shrink-0">
-                    <span className="text-xl font-extrabold text-foreground">R$ {acc.pricePerNight}</span>
-                    <span className="text-xs text-muted-foreground block">/noite</span>
-                    <span className="text-xs font-semibold text-primary block">
+                  <div className="sm:text-right flex-shrink-0 flex sm:flex-col items-center sm:items-end gap-2 sm:gap-0">
+                    <span className="text-lg md:text-xl font-extrabold text-foreground">R$ {acc.pricePerNight}</span>
+                    <span className="text-xs text-muted-foreground">/noite</span>
+                    <span className="text-xs font-semibold text-primary">
                       Total: R$ {totalCost.toLocaleString("pt-BR")}
                     </span>
                   </div>
                 </div>
+                {acc.bookingUrl && (
+                  <a href={acc.bookingUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold px-3 py-1.5 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
+                    <ExternalLink size={12} /> Reservar
+                  </a>
+                )}
                 <div className="flex flex-wrap items-center gap-3 mt-3">
                   {acc.rating && (
                     <span className="flex items-center gap-1 text-sm">

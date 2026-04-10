@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { ArrowLeft, Plane, Calendar, Users, MapPin, Trash2, DollarSign, Bus, Hotel, Utensils, Star, Navigation, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Plane, Calendar, Users, MapPin, Trash2, DollarSign, Bus, Hotel, Utensils, Star, Navigation, ChevronRight, MessageSquare } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
+import StarRating from '@/components/StarRating';
 import { budgetRanges, transportOptions, localTransportOptions, monthNames } from '@/data/mockData';
 import type { TouristSpot } from '@/types/travel';
 
@@ -23,13 +24,79 @@ const TravelHistory = () => {
   const [records, setRecords] = useState<TravelRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<TravelRecord | null>(null);
+  // Review state
+  const [activityRatings, setActivityRatings] = useState<Record<string, number>>({});
+  const [accommodationRating, setAccommodationRating] = useState(0);
+  const [savingReview, setSavingReview] = useState<string | null>(null);
 
   useEffect(() => { if (!user) { navigate('/auth'); return; } fetchHistory(); }, [user]);
+
+  // Load existing reviews when a record is selected
+  useEffect(() => {
+    if (!selected || !user) return;
+    setActivityRatings({});
+    setAccommodationRating(0);
+    loadExistingReviews(selected);
+  }, [selected?.id]);
 
   const fetchHistory = async () => {
     const { data } = await supabase.from('travel_history').select('*').order('created_at', { ascending: false });
     setRecords((data as unknown as TravelRecord[]) || []);
     setLoading(false);
+  };
+
+  const loadExistingReviews = async (record: TravelRecord) => {
+    if (!user) return;
+    const cityId = record.state; // city identifier
+    // Load activity reviews
+    const spots = (record.tourist_spots || []) as TouristSpot[];
+    if (spots.length > 0) {
+      const { data: actReviews } = await supabase
+        .from("activity_reviews" as any)
+        .select("activity_name, score")
+        .eq("user_id", user.id)
+        .eq("city_id", cityId);
+      if (actReviews && Array.isArray(actReviews)) {
+        const map: Record<string, number> = {};
+        (actReviews as any[]).forEach((r: any) => { map[r.activity_name] = r.score; });
+        setActivityRatings(map);
+      }
+    }
+    // Load accommodation review
+    if (record.accommodation) {
+      const { data: accReviews } = await supabase
+        .from("accommodation_reviews" as any)
+        .select("score")
+        .eq("user_id", user.id)
+        .eq("accommodation_name", record.accommodation)
+        .eq("city_id", cityId)
+        .limit(1);
+      if (accReviews && Array.isArray(accReviews) && accReviews.length > 0) {
+        setAccommodationRating((accReviews[0] as any).score);
+      }
+    }
+  };
+
+  const saveActivityReview = async (activityName: string, cityId: string) => {
+    if (!user) return;
+    const score = activityRatings[activityName];
+    if (!score) return;
+    setSavingReview(activityName);
+    await supabase.from("activity_reviews" as any).upsert(
+      { user_id: user.id, activity_name: activityName, city_id: cityId, score, comment: null } as any,
+      { onConflict: "user_id,activity_name,city_id" }
+    );
+    setSavingReview(null);
+  };
+
+  const saveAccommodationReview = async (accommodationName: string, cityId: string) => {
+    if (!user || !accommodationRating) return;
+    setSavingReview("accommodation");
+    await supabase.from("accommodation_reviews" as any).upsert(
+      { user_id: user.id, accommodation_name: accommodationName, city_id: cityId, score: accommodationRating, comment: null } as any,
+      { onConflict: "user_id,accommodation_name,city_id" }
+    );
+    setSavingReview(null);
   };
 
   const deleteRecord = async (id: string, e: React.MouseEvent) => {
@@ -49,35 +116,33 @@ const TravelHistory = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Nav */}
       <nav className="sticky top-0 z-50 bg-pe-navy border-b border-pe-blue/20">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button onClick={() => navigate('/')} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
-            <div className="w-10 h-10 rounded-xl bg-pe-gold flex items-center justify-center">
-              <Navigation size={20} className="text-pe-navy" />
+        <div className="max-w-7xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between">
+          <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-pe-gold flex items-center justify-center">
+              <Navigation size={16} className="text-pe-navy" />
             </div>
-            <span className="text-xl font-black tracking-tight text-white">
+            <span className="text-lg md:text-xl font-black tracking-tight text-white">
               TRIP<span className="text-pe-gold">SMART</span>
             </span>
           </button>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10">
-              <ArrowLeft size={14} /> Início
+              <ArrowLeft size={14} /> <span className="hidden sm:inline">Início</span>
             </Button>
           </div>
         </div>
       </nav>
 
-      {/* Header banner */}
-      <div className="bg-pe-blue px-6 py-10">
+      <div className="bg-pe-blue px-4 md:px-6 py-8 md:py-10">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl font-black tracking-display text-white">Histórico de viagens</h1>
-          <p className="text-white/70 mt-2">Todas as suas viagens planejadas</p>
+          <h1 className="text-2xl md:text-3xl font-black tracking-display text-white">Histórico de viagens</h1>
+          <p className="text-white/70 mt-2 text-sm md:text-base">Todas as suas viagens planejadas</p>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-6 md:py-10">
         {loading ? (
           <p className="text-muted-foreground text-center py-12">Carregando...</p>
         ) : records.length === 0 ? (
@@ -89,29 +154,24 @@ const TravelHistory = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
             {records.map((r, i) => (
               <motion.button key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} onClick={() => setSelected(r)} className="rounded-2xl border border-border bg-card text-left hover:border-pe-blue/40 transition-all group overflow-hidden" style={{ boxShadow: 'var(--card-shadow)' }}>
-                {/* Colored strip */}
                 <div className="h-1.5 bg-pe-gold" />
-                <div className="p-5">
+                <div className="p-4 md:p-5">
                   <div className="flex items-start justify-between">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-3 flex-wrap">
+                    <div className="space-y-2 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="flex items-center gap-1 text-sm font-semibold px-2 py-1 rounded-full bg-pe-blue/10 text-primary"><MapPin size={14} /> {r.state}</span>
                         <span className="flex items-center gap-1 text-xs text-muted-foreground"><Calendar size={12} /> {new Date(r.created_at).toLocaleDateString('pt-BR')}</span>
                       </div>
-                      <div className="flex items-center gap-3 flex-wrap">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="flex items-center gap-1 text-xs text-muted-foreground"><Users size={12} /> {r.people}p · {groupTypeLabel(r.group_type)}</span>
                         {r.month && <span className="text-xs px-2 py-0.5 rounded-full bg-pe-gold/10 text-pe-gold font-semibold">📅 {monthNames[(r.month || 1) - 1]}</span>}
                       </div>
                       <p className="text-sm text-foreground font-bold tabular-nums">{getBudgetLabel(r.budget)}</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {r.transport_to_destination && <span className="text-xs px-2 py-0.5 rounded-full bg-pe-red/10 text-pe-red font-semibold">{getTransportLabel(r.transport_to_destination)}</span>}
-                        {r.accommodation && <span className="text-xs px-2 py-0.5 rounded-full bg-pe-blue/10 text-primary font-semibold">🏨 {r.accommodation}</span>}
-                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 ml-2">
                       <button onClick={(e) => deleteRecord(r.id, e)} className="text-muted-foreground hover:text-destructive transition-colors p-1"><Trash2 size={16} /></button>
                       <ChevronRight size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
                     </div>
@@ -146,6 +206,29 @@ const TravelHistory = () => {
                 </div>
               </div>
 
+              {/* Accommodation review */}
+              {selected.accommodation && user && (
+                <div className="p-4 rounded-xl border border-border bg-card space-y-2">
+                  <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                    <Hotel size={14} className="text-pe-red" /> Avaliar hospedagem
+                  </h3>
+                  <p className="text-xs text-muted-foreground">{selected.accommodation}</p>
+                  <StarRating
+                    value={accommodationRating}
+                    onChange={(v) => setAccommodationRating(v)}
+                    size={18}
+                  />
+                  <Button
+                    size="sm"
+                    disabled={!accommodationRating || savingReview === "accommodation"}
+                    onClick={() => saveAccommodationReview(selected.accommodation!, selected.state)}
+                    className="rounded-full text-xs gap-1"
+                  >
+                    <MessageSquare size={12} /> {savingReview === "accommodation" ? "Salvando..." : "Salvar avaliação"}
+                  </Button>
+                </div>
+              )}
+
               {spots.length > 0 && (
                 <div className="space-y-3">
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-wider flex items-center gap-2">
@@ -153,16 +236,43 @@ const TravelHistory = () => {
                   </h3>
                   <div className="space-y-2">
                     {spots.map((spot: TouristSpot) => (
-                      <div key={spot.id} className="p-3 rounded-xl border border-border bg-card flex items-center gap-3">
-                        <span className="text-2xl">{spot.imageEmoji}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold text-card-foreground truncate">{spot.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{spot.description}</p>
+                      <div key={spot.id} className="p-3 rounded-xl border border-border bg-card space-y-2">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{spot.imageEmoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold text-card-foreground truncate">{spot.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{spot.description}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className="flex items-center gap-0.5 text-xs"><Star size={10} className="text-pe-gold fill-pe-gold" />{spot.rating}</span>
+                            <p className="text-[10px] text-muted-foreground">{spot.avgCostPerPerson === 0 ? 'Grátis' : `R$${spot.avgCostPerPerson}`}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <span className="flex items-center gap-0.5 text-xs"><Star size={10} className="text-pe-gold fill-pe-gold" />{spot.rating}</span>
-                          <p className="text-[10px] text-muted-foreground">{spot.avgCostPerPerson === 0 ? 'Grátis' : `R$${spot.avgCostPerPerson}`}</p>
-                        </div>
+                        {/* Activity review inline */}
+                        {user && (
+                          <div className="flex items-center gap-2 pt-1 border-t border-border/50">
+                            <StarRating
+                              value={activityRatings[spot.name] || 0}
+                              onChange={(v) => {
+                                setActivityRatings((p) => ({ ...p, [spot.name]: v }));
+                                // Auto-save on rating change
+                                setTimeout(() => {
+                                  const score = v;
+                                  if (!score || !user) return;
+                                  supabase.from("activity_reviews" as any).upsert(
+                                    { user_id: user.id, activity_name: spot.name, city_id: selected.state, score, comment: null } as any,
+                                    { onConflict: "user_id,activity_name,city_id" }
+                                  );
+                                }, 100);
+                              }}
+                              size={14}
+                              showValue={false}
+                            />
+                            <span className="text-[10px] text-muted-foreground">
+                              {activityRatings[spot.name] ? "Avaliado ✓" : "Avaliar"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
