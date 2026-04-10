@@ -33,7 +33,7 @@ const featuredDestinations = [
   {
     name: "Recife",
     cityId: "recife",
-    image: "🏙️",
+    imageUrl: pernambucoImages.recife,
     tag: "Capital",
     color: "bg-pe-blue",
     desc: "Marco Zero, Brennand e praias urbanas",
