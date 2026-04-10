@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Check, RotateCcw, Save, Map, ExternalLink, CalendarDays, Share2, MapPin, Clock, DollarSign, Lightbulb, AlertTriangle, ChevronDown, ChevronUp, Navigation, Info, Instagram, Phone, MessageSquare, FileDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,7 +30,6 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const [expandedHighlights, setExpandedHighlights] = useState<Record<string, boolean>>({});
   const [exportingPdf, setExportingPdf] = useState(false);
   const itineraryRef = useRef<HTMLDivElement>(null);
-  // Review state
   const [activityRatings, setActivityRatings] = useState<Record<string, number>>({});
   const [activityComments, setActivityComments] = useState<Record<string, string>>({});
   const [accommodationRating, setAccommodationRating] = useState(0);
@@ -44,7 +44,6 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
   const toggleZone = (i: number) => setExpandedZones((p) => ({ ...p, [i]: !p[i] }));
   const toggleHighlight = (key: string) => setExpandedHighlights((p) => ({ ...p, [key]: !p[key] }));
 
-  // Real cost calculation
   const realAccommodationCost = data.accommodation ? data.accommodation.pricePerNight * data.days : 0;
   const realActivitiesCost = data.selectedSpots.reduce((sum, s) => sum + (s.avgCostPerPerson || 0), 0) * data.people;
 
@@ -62,20 +61,20 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     ? Object.values(computedCostBreakdown).reduce((a, b) => a + b, 0)
     : richItinerary?.estimatedTotalCost || 0;
 
-  // Save review helpers
+  // Auto-generate itinerary on mount
+  useEffect(() => {
+    if (!richItinerary && !loadingItinerary) {
+      generateItinerary();
+    }
+  }, []);
+
   const saveActivityReview = async (activityName: string) => {
     if (!user) return;
     const score = activityRatings[activityName];
     if (!score) return;
     setSavingReview(activityName);
     const { error } = await supabase.from("activity_reviews" as any).upsert(
-      {
-        user_id: user.id,
-        activity_name: activityName,
-        city_id: data.city,
-        score,
-        comment: activityComments[activityName] || null,
-      } as any,
+      { user_id: user.id, activity_name: activityName, city_id: data.city, score, comment: activityComments[activityName] || null } as any,
       { onConflict: "user_id,activity_name,city_id" }
     );
     setSavingReview(null);
@@ -90,13 +89,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     if (!user || !data.accommodation || !accommodationRating) return;
     setSavingReview("accommodation");
     const { error } = await supabase.from("accommodation_reviews" as any).upsert(
-      {
-        user_id: user.id,
-        accommodation_name: data.accommodation.name,
-        city_id: data.city,
-        score: accommodationRating,
-        comment: accommodationComment || null,
-      } as any,
+      { user_id: user.id, accommodation_name: data.accommodation.name, city_id: data.city, score: accommodationRating, comment: accommodationComment || null } as any,
       { onConflict: "user_id,accommodation_name,city_id" }
     );
     setSavingReview(null);
@@ -111,25 +104,20 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     if (!user) return;
     setSaving(true);
     const { error } = await supabase.from("travel_history").insert({
-      user_id: user.id,
-      budget: data.budget,
-      people: data.people,
-      group_type: data.groupType,
-      country: "Brasil",
-      state: `${data.cityName}, PE`,
-      entertainment: data.selectedSpots.map((s) => s.name),
-      food: [],
-      accommodation: data.accommodation?.name || null,
-      month: data.month,
+      user_id: user.id, budget: data.budget, people: data.people, group_type: data.groupType,
+      country: "Brasil", state: `${data.cityName}, PE`,
+      entertainment: data.selectedSpots.map((s) => s.name), food: [],
+      accommodation: data.accommodation?.name || null, month: data.month,
       transport_to_destination: data.transportToDestination,
-      tourist_spots: data.selectedSpots as any,
-      local_transport: data.localTransport,
+      tourist_spots: data.selectedSpots as any, local_transport: data.localTransport,
     });
     setSaving(false);
     if (error) {
       toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
     } else {
       setSaved(true);
+      // Clear sessionStorage on save
+      sessionStorage.removeItem("planner-state");
       toast({ title: "Viagem salva!", description: "Acesse seu histórico para ver." });
     }
   };
@@ -141,39 +129,26 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       user_id: user.id,
       title: `${data.days} dias em ${data.cityName}`,
       description: `Roteiro de ${data.days} dias em ${data.cityName}, PE · ${data.adults} adulto${data.adults > 1 ? "s" : ""}${data.children > 0 ? ` + ${data.children} criança${data.children > 1 ? "s" : ""}` : ""} · ${data.rooms} quarto${data.rooms > 1 ? "s" : ""}${data.isCouple ? " · Casal" : ""} · ${data.selectedSpots.length} atividades.`,
-      budget: data.budget,
-      budget_label: data.budgetLabel,
-      people: data.people,
-      days: data.days,
-      group_type: data.groupType,
-      month: data.month,
-      transport_to_destination: data.transportToDestination,
-      city: data.city,
-      city_name: data.cityName,
-      selected_spots: data.selectedSpots as any,
-      accommodation: data.accommodation as any,
-      local_transport: data.localTransport,
+      budget: data.budget, budget_label: data.budgetLabel, people: data.people, days: data.days,
+      group_type: data.groupType, month: data.month, transport_to_destination: data.transportToDestination,
+      city: data.city, city_name: data.cityName, selected_spots: data.selectedSpots as any,
+      accommodation: data.accommodation as any, local_transport: data.localTransport,
       itinerary_data: richItinerary as any,
     } as any);
     if (!saved) {
       await supabase.from("travel_history").insert({
-        user_id: user.id,
-        budget: data.budget,
-        people: data.people,
-        group_type: data.groupType,
-        country: "Brasil",
-        state: `${data.cityName}, PE`,
-        entertainment: data.selectedSpots.map((s) => s.name),
-        food: [],
-        accommodation: data.accommodation?.name || null,
-        month: data.month,
+        user_id: user.id, budget: data.budget, people: data.people, group_type: data.groupType,
+        country: "Brasil", state: `${data.cityName}, PE`,
+        entertainment: data.selectedSpots.map((s) => s.name), food: [],
+        accommodation: data.accommodation?.name || null, month: data.month,
         transport_to_destination: data.transportToDestination,
-        tourist_spots: data.selectedSpots as any,
-        local_transport: data.localTransport,
+        tourist_spots: data.selectedSpots as any, local_transport: data.localTransport,
       });
       setSaved(true);
     }
     setSharing(false);
+    // Clear sessionStorage on share
+    sessionStorage.removeItem("planner-state");
     if (shareError) {
       toast({ title: "Erro ao compartilhar", description: shareError.message, variant: "destructive" });
     } else {
@@ -190,26 +165,12 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
         body: {
           action: "generate-itinerary",
           params: {
-            budget: data.budget,
-            budgetLabel: data.budgetLabel,
-            people: data.people,
-            adults: data.adults,
-            children: data.children,
-            isCouple: data.isCouple,
-            rooms: data.rooms,
-            days: data.days,
-            month: data.month,
-            transportToDestination: data.transportToDestination,
-            city: data.cityName,
-            selectedSpots: data.selectedSpots.map((s) => ({
-              name: s.name,
-              category: s.category,
-              lat: s.lat,
-              lng: s.lng,
-            })),
-            accommodation: data.accommodation
-              ? { name: data.accommodation.name, lat: data.accommodation.lat, lng: data.accommodation.lng }
-              : null,
+            budget: data.budget, budgetLabel: data.budgetLabel, people: data.people,
+            adults: data.adults, children: data.children, isCouple: data.isCouple,
+            rooms: data.rooms, days: data.days, month: data.month,
+            transportToDestination: data.transportToDestination, city: data.cityName,
+            selectedSpots: data.selectedSpots.map((s) => ({ name: s.name, category: s.category, lat: s.lat, lng: s.lng })),
+            accommodation: data.accommodation ? { name: data.accommodation.name, lat: data.accommodation.lat, lng: data.accommodation.lng } : null,
             localTransport: data.localTransport,
           },
         },
@@ -218,13 +179,8 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       if (result?.data) {
         const raw = Array.isArray(result.data) ? result.data[0] : result.data;
         setRichItinerary(raw as RichItinerary);
-        toast({ title: "Roteiro gerado! 🤖" });
       } else {
-        toast({
-          title: "Não foi possível gerar o roteiro",
-          description: "Tente novamente mais tarde.",
-          variant: "destructive",
-        });
+        toast({ title: "Não foi possível gerar o roteiro", description: "Tente novamente mais tarde.", variant: "destructive" });
       }
     } catch (e: any) {
       toast({ title: "Erro ao gerar roteiro", description: e.message, variant: "destructive" });
@@ -285,24 +241,25 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col items-center gap-8 w-full"
+      className="flex flex-col items-center gap-6 md:gap-8 w-full"
       role="main"
       aria-label="Resumo do roteiro"
     >
-      <div ref={itineraryRef} className="flex flex-col items-center gap-8 w-full">
-      <div className="w-16 h-16 rounded-full gradient-pe flex items-center justify-center">
-        <Check size={32} className="text-primary-foreground" />
+      <div ref={itineraryRef} className="flex flex-col items-center gap-6 md:gap-8 w-full">
+      <div className="w-12 h-12 md:w-16 md:h-16 rounded-full gradient-pe flex items-center justify-center">
+        <Check size={24} className="text-primary-foreground md:hidden" />
+        <Check size={32} className="text-primary-foreground hidden md:block" />
       </div>
 
       <div className="text-center space-y-2">
-        <h2 className="text-3xl md:text-4xl font-extrabold tracking-display text-foreground">Roteiro pronto! 🎉</h2>
-        <p className="text-muted-foreground text-lg">
+        <h2 className="text-2xl md:text-4xl font-extrabold tracking-display text-foreground">Roteiro pronto! 🎉</h2>
+        <p className="text-muted-foreground text-base md:text-lg">
           {data.days} dia{data.days > 1 ? "s" : ""} em {data.cityName}, PE
         </p>
       </div>
 
       {/* Summary Card */}
-      <div className="w-full p-6 rounded-2xl border border-border bg-card space-y-4" style={{ boxShadow: "var(--card-shadow)" }}>
+      <div className="w-full p-4 md:p-6 rounded-2xl border border-border bg-card space-y-3 md:space-y-4" style={{ boxShadow: "var(--card-shadow)" }}>
         <SummaryRow label="Orçamento" value={data.budgetLabel} />
         <SummaryRow label="Adultos" value={`${data.adults}`} />
         {data.children > 0 && <SummaryRow label="Crianças" value={`${data.children}`} />}
@@ -342,8 +299,17 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
                 ⭐ {data.accommodation.rating} · R$ {data.accommodation.pricePerNight}/noite · Total: R${" "}
                 {(data.accommodation.pricePerNight * data.days).toLocaleString("pt-BR")}
               </span>
+              {data.accommodation.bookingUrl && (
+                <a
+                  href={data.accommodation.bookingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold px-3 py-1.5 rounded-full bg-primary text-primary-foreground hover:opacity-90 transition-opacity"
+                >
+                  <ExternalLink size={12} /> Reservar
+                </a>
+              )}
             </div>
-            {/* Accommodation review */}
             {user && (
               <div className="p-3 rounded-xl bg-muted/30 space-y-2">
                 <span className="text-xs font-bold text-muted-foreground">Avaliar hospedagem</span>
@@ -354,12 +320,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
                   onChange={(e) => setAccommodationComment(e.target.value)}
                   className="w-full bg-background border border-border rounded-lg p-2 text-sm text-foreground placeholder:text-muted-foreground resize-none h-16"
                 />
-                <Button
-                  size="sm"
-                  disabled={!accommodationRating || savingReview === "accommodation"}
-                  onClick={saveAccommodationReview}
-                  className="rounded-full text-xs gap-1"
-                >
+                <Button size="sm" disabled={!accommodationRating || savingReview === "accommodation"} onClick={saveAccommodationReview} className="rounded-full text-xs gap-1">
                   <MessageSquare size={12} /> {savingReview === "accommodation" ? "Salvando..." : "Enviar avaliação"}
                 </Button>
               </div>
@@ -389,7 +350,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       {/* Google Maps Link */}
       <button
         onClick={openGoogleMaps}
-        className="flex items-center gap-2 px-6 py-3 rounded-full border border-primary text-primary font-bold hover:bg-primary/10 transition-colors"
+        className="flex items-center gap-2 px-4 md:px-6 py-3 rounded-full border border-primary text-primary font-bold hover:bg-primary/10 transition-colors text-sm md:text-base"
       >
         <ExternalLink size={16} /> Abrir roteiro no Google Maps
       </button>
@@ -401,17 +362,37 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
           <span className="font-bold text-lg text-foreground">Roteiro dia a dia</span>
         </div>
 
-        {richItinerary ? (
-          <div className="space-y-8">
+        {loadingItinerary ? (
+          <div className="space-y-4">
+            <div className="p-5 rounded-2xl border border-border bg-card space-y-3">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+            {Array.from({ length: Math.min(data.days, 3) }).map((_, i) => (
+              <div key={i} className="p-5 rounded-2xl border border-border bg-card space-y-3">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-4 w-56" />
+                <div className="space-y-2 ml-4">
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-5/6" />
+                  <Skeleton className="h-3 w-4/6" />
+                </div>
+              </div>
+            ))}
+            <p className="text-sm text-center text-muted-foreground animate-pulse">Gerando roteiro personalizado...</p>
+          </div>
+        ) : richItinerary ? (
+          <div className="space-y-6 md:space-y-8">
             {/* Introduction */}
-            <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20">
-              <h3 className="text-2xl md:text-3xl font-extrabold text-foreground mb-2">{richItinerary.city}</h3>
-              <p className="text-muted-foreground leading-relaxed">{richItinerary.introduction}</p>
+            <div className="p-4 md:p-6 rounded-2xl bg-primary/5 border border-primary/20">
+              <h3 className="text-xl md:text-3xl font-extrabold text-foreground mb-2">{richItinerary.city}</h3>
+              <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{richItinerary.introduction}</p>
             </div>
 
             {/* Festive Alert */}
             {richItinerary.festiveAlert && (
-              <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex gap-3">
+              <div className="p-4 md:p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex gap-3">
                 <AlertTriangle size={24} className="text-amber-500 shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-bold text-foreground">🎉 {richItinerary.festiveAlert.name}</h4>
@@ -423,118 +404,76 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
               </div>
             )}
 
-            {/* Day-by-day summary cards */}
+            {/* Day-by-day */}
             <div className="space-y-3">
               {richItinerary.days?.map((day: RichDay) => (
-                <div key={day.day} className="p-5 rounded-2xl border border-border bg-card" style={{ boxShadow: "var(--card-shadow)" }}>
-                  <h4 className="font-extrabold text-foreground text-lg mb-1">Dia {day.day}</h4>
+                <div key={day.day} className="p-4 md:p-5 rounded-2xl border border-border bg-card" style={{ boxShadow: "var(--card-shadow)" }}>
+                  <h4 className="font-extrabold text-foreground text-base md:text-lg mb-1">Dia {day.day}</h4>
                   <p className="text-primary font-semibold text-sm mb-1">{day.title}</p>
                   <p className="text-muted-foreground text-sm">{day.summary}</p>
 
-                  {/* Activities timeline */}
-                  <div className="mt-4 space-y-3 border-l-2 border-primary/20 pl-4 ml-2">
-                    {day.activities?.map((act: RichActivity, j: number) => {
-                      const actKey = `${act.title}-${day.day}`;
-                      return (
-                        <div key={j} className="relative">
-                          <div className="absolute -left-[22px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />
-                          <div className="flex flex-col gap-0.5">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">{act.time}</span>
-                              <span className="text-xs text-muted-foreground">{act.period}</span>
-                              {act.duration && <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock size={10} />{act.duration}</span>}
-                            </div>
-                            <h5 className="font-bold text-foreground text-sm">{act.title}</h5>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{act.description}</p>
-                            <div className="flex flex-wrap gap-3 mt-1">
-                              {act.location && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <MapPin size={10} className="text-primary" /> {act.location}
-                                </span>
-                              )}
-                              {act.transport && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <Navigation size={10} className="text-primary" /> {act.transport}
-                                </span>
-                              )}
-                              {act.estimatedCost > 0 && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                  <DollarSign size={10} className="text-primary" /> R$ {act.estimatedCost}
-                                </span>
-                              )}
-                            </div>
-                            {act.tips && (
-                              <p className="text-xs text-primary/80 mt-1 flex items-start gap-1">
-                                <Lightbulb size={10} className="mt-0.5 shrink-0" /> {act.tips}
-                              </p>
-                            )}
-                            {/* Activity rating */}
-                            {user && (
-                              <div className="mt-2 p-2 rounded-lg bg-muted/20 space-y-1">
-                                <StarRating
-                                  value={activityRatings[act.title] || 0}
-                                  onChange={(v) => setActivityRatings((p) => ({ ...p, [act.title]: v }))}
-                                  size={14}
-                                />
-                                <div className="flex gap-2">
-                                  <input
-                                    type="text"
-                                    placeholder="Comentário..."
-                                    value={activityComments[act.title] || ""}
-                                    onChange={(e) => setActivityComments((p) => ({ ...p, [act.title]: e.target.value }))}
-                                    className="flex-1 bg-background border border-border rounded px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground"
-                                  />
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    disabled={!activityRatings[act.title] || savingReview === act.title}
-                                    onClick={() => saveActivityReview(act.title)}
-                                    className="text-xs h-7 px-2"
-                                  >
-                                    {savingReview === act.title ? "..." : "Avaliar"}
-                                  </Button>
-                                </div>
-                              </div>
-                            )}
+                  <div className="mt-4 space-y-3 border-l-2 border-primary/20 pl-3 md:pl-4 ml-1 md:ml-2">
+                    {day.activities?.map((act: RichActivity, j: number) => (
+                      <div key={j} className="relative">
+                        <div className="absolute -left-[18px] md:-left-[22px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-background" />
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">{act.time}</span>
+                            <span className="text-xs text-muted-foreground">{act.period}</span>
+                            {act.duration && <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock size={10} />{act.duration}</span>}
                           </div>
+                          <h5 className="font-bold text-foreground text-sm">{act.title}</h5>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{act.description}</p>
+                          <div className="flex flex-wrap gap-2 md:gap-3 mt-1">
+                            {act.location && <span className="text-xs text-muted-foreground flex items-center gap-1"><MapPin size={10} className="text-primary" /> {act.location}</span>}
+                            {act.transport && <span className="text-xs text-muted-foreground flex items-center gap-1"><Navigation size={10} className="text-primary" /> {act.transport}</span>}
+                            {act.estimatedCost > 0 && <span className="text-xs text-muted-foreground flex items-center gap-1"><DollarSign size={10} className="text-primary" /> R$ {act.estimatedCost}</span>}
+                          </div>
+                          {act.tips && (
+                            <p className="text-xs text-primary/80 mt-1 flex items-start gap-1">
+                              <Lightbulb size={10} className="mt-0.5 shrink-0" /> {act.tips}
+                            </p>
+                          )}
+                          {user && (
+                            <div className="mt-2 p-2 rounded-lg bg-muted/20 space-y-1">
+                              <StarRating value={activityRatings[act.title] || 0} onChange={(v) => setActivityRatings((p) => ({ ...p, [act.title]: v }))} size={14} />
+                              <div className="flex gap-2">
+                                <input type="text" placeholder="Comentário..." value={activityComments[act.title] || ""} onChange={(e) => setActivityComments((p) => ({ ...p, [act.title]: e.target.value }))} className="flex-1 bg-background border border-border rounded px-2 py-1 text-xs text-foreground placeholder:text-muted-foreground" />
+                                <Button size="sm" variant="ghost" disabled={!activityRatings[act.title] || savingReview === act.title} onClick={() => saveActivityReview(act.title)} className="text-xs h-7 px-2">
+                                  {savingReview === act.title ? "..." : "Avaliar"}
+                                </Button>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* ===== ATTRACTION ZONES ("Polos de Atrações") ===== */}
+            {/* Attraction Zones */}
             {richItinerary.attractionZones && richItinerary.attractionZones.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-xl md:text-2xl font-extrabold text-foreground flex items-center gap-2">
+                <h3 className="text-lg md:text-2xl font-extrabold text-foreground flex items-center gap-2">
                   <MapPin size={22} className="text-primary" />
                   O que fazer em {richItinerary.city}: os polos de atrações
                 </h3>
-
                 {richItinerary.attractionZones.map((zone: AttractionZone, zi: number) => {
                   const isOpen = expandedZones[zi] ?? true;
                   return (
                     <div key={zi} className="rounded-2xl border border-border bg-card overflow-hidden" style={{ boxShadow: "var(--card-shadow)" }}>
-                      <button
-                        onClick={() => toggleZone(zi)}
-                        className="w-full flex items-center justify-between p-5 text-left hover:bg-accent/50 transition-colors"
-                      >
-                        <h4 className="font-extrabold text-foreground text-lg">{zone.name}</h4>
+                      <button onClick={() => toggleZone(zi)} className="w-full flex items-center justify-between p-4 md:p-5 text-left hover:bg-accent/50 transition-colors">
+                        <h4 className="font-extrabold text-foreground text-base md:text-lg">{zone.name}</h4>
                         {isOpen ? <ChevronUp size={20} className="text-muted-foreground" /> : <ChevronDown size={20} className="text-muted-foreground" />}
                       </button>
-
                       {isOpen && (
-                        <div className="px-5 pb-5 space-y-5">
+                        <div className="px-4 md:px-5 pb-4 md:pb-5 space-y-5">
                           <p className="text-muted-foreground text-sm leading-relaxed whitespace-pre-line">{zone.description}</p>
-
-                          {/* Recommended itinerary */}
                           {zone.recommendedItinerary && (
-                            <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
-                              <h5 className="font-bold text-primary text-sm flex items-center gap-2">
-                                <Navigation size={14} /> {zone.recommendedItinerary.title}
-                              </h5>
+                            <div className="p-3 md:p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
+                              <h5 className="font-bold text-primary text-sm flex items-center gap-2"><Navigation size={14} /> {zone.recommendedItinerary.title}</h5>
                               <p className="text-xs text-muted-foreground">{zone.recommendedItinerary.arrivalTime}</p>
                               <ol className="list-decimal list-inside space-y-1">
                                 {zone.recommendedItinerary.steps.map((step: string, si: number) => (
@@ -543,17 +482,12 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
                               </ol>
                             </div>
                           )}
-
-                          {/* Highlights */}
                           {zone.highlights?.map((hl: AttractionHighlight, hi: number) => {
                             const hlKey = `${zi}-${hi}`;
                             const hlOpen = expandedHighlights[hlKey] ?? false;
                             return (
                               <div key={hi} className="rounded-xl border border-border overflow-hidden">
-                                <button
-                                  onClick={() => toggleHighlight(hlKey)}
-                                  className="w-full flex items-center justify-between p-4 text-left hover:bg-accent/30 transition-colors"
-                                >
+                                <button onClick={() => toggleHighlight(hlKey)} className="w-full flex items-center justify-between p-3 md:p-4 text-left hover:bg-accent/30 transition-colors">
                                   <div className="flex items-center gap-2">
                                     <MapPin size={14} className="text-primary shrink-0" />
                                     <span className="font-bold text-foreground text-sm">{hl.name}</span>
@@ -561,13 +495,11 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
                                   {hlOpen ? <ChevronUp size={16} className="text-muted-foreground" /> : <ChevronDown size={16} className="text-muted-foreground" />}
                                 </button>
                                 {hlOpen && (
-                                  <div className="px-4 pb-4 space-y-3">
+                                  <div className="px-3 md:px-4 pb-3 md:pb-4 space-y-3">
                                     <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{hl.description}</p>
                                     {hl.practicalInfo && (
                                       <div className="p-3 rounded-lg bg-muted/50 space-y-1">
-                                        <h6 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                                          <Info size={10} /> Informações práticas
-                                        </h6>
+                                        <h6 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-1"><Info size={10} /> Informações práticas</h6>
                                         {hl.practicalInfo.address && <p className="text-xs text-foreground flex items-center gap-1"><MapPin size={10} className="text-primary" /> {hl.practicalInfo.address}</p>}
                                         {hl.practicalInfo.hours && <p className="text-xs text-foreground flex items-center gap-1"><Clock size={10} className="text-primary" /> {hl.practicalInfo.hours}</p>}
                                         {hl.practicalInfo.price && <p className="text-xs text-foreground flex items-center gap-1"><DollarSign size={10} className="text-primary" /> {hl.practicalInfo.price}</p>}
@@ -590,7 +522,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
 
             {/* Practical Tips */}
             {richItinerary.practicalTips && richItinerary.practicalTips.length > 0 && (
-              <div className="p-5 rounded-2xl border border-border bg-card space-y-3" style={{ boxShadow: "var(--card-shadow)" }}>
+              <div className="p-4 md:p-5 rounded-2xl border border-border bg-card space-y-3" style={{ boxShadow: "var(--card-shadow)" }}>
                 <h4 className="font-extrabold text-foreground flex items-center gap-2">
                   <Lightbulb size={18} className="text-primary" /> Dicas práticas
                 </h4>
@@ -605,13 +537,13 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
               </div>
             )}
 
-            {/* Cost Breakdown – real values */}
+            {/* Cost Breakdown */}
             {computedCostBreakdown && (
-              <div className="p-5 rounded-2xl border border-border bg-card space-y-3" style={{ boxShadow: "var(--card-shadow)" }}>
+              <div className="p-4 md:p-5 rounded-2xl border border-border bg-card space-y-3" style={{ boxShadow: "var(--card-shadow)" }}>
                 <h4 className="font-extrabold text-foreground flex items-center gap-2">
                   <DollarSign size={18} className="text-primary" /> Estimativa de custos
                 </h4>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <CostRow label="Hospedagem" value={computedCostBreakdown.accommodation} />
                   <CostRow label="Alimentação" value={computedCostBreakdown.food} />
                   <CostRow label="Transporte" value={computedCostBreakdown.transport} />
@@ -626,14 +558,10 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
             )}
           </div>
         ) : (
-          <div className="p-5 rounded-2xl border border-dashed border-primary/40 bg-primary/5">
-            <p className="text-sm text-primary font-semibold">🤖 Gere o roteiro personalizado pela IA</p>
-            <Button
-              onClick={generateItinerary}
-              disabled={loadingItinerary}
-              className="mt-3 gradient-pe border-0 rounded-full font-bold gap-2"
-            >
-              <CalendarDays size={16} /> {loadingItinerary ? "Gerando roteiro..." : "Gerar roteiro com IA"}
+          <div className="p-5 rounded-2xl border border-dashed border-primary/40 bg-primary/5 text-center">
+            <p className="text-sm text-muted-foreground">Não foi possível gerar o roteiro automaticamente.</p>
+            <Button onClick={generateItinerary} disabled={loadingItinerary} className="mt-3 gradient-pe border-0 rounded-full font-bold gap-2">
+              <CalendarDays size={16} /> Tentar novamente
             </Button>
           </div>
         )}
@@ -642,19 +570,19 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
       </div>{/* close itineraryRef wrapper */}
 
       {/* Actions */}
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md" role="group" aria-label="Ações do roteiro">
+      <div className="flex flex-col gap-3 w-full max-w-md" role="group" aria-label="Ações do roteiro">
         {richItinerary && (
-          <Button onClick={exportToPdf} disabled={exportingPdf} variant="outline" className="flex-1 rounded-full font-bold gap-2">
+          <Button onClick={exportToPdf} disabled={exportingPdf} variant="outline" className="w-full rounded-full font-bold gap-2">
             <FileDown size={16} /> {exportingPdf ? "Exportando..." : "Exportar PDF"}
           </Button>
         )}
         {!saved && !shared && (
-          <Button onClick={handleSave} disabled={saving} className="flex-1 gradient-pe border-0 rounded-full font-bold gap-2">
+          <Button onClick={handleSave} disabled={saving} className="w-full gradient-pe border-0 rounded-full font-bold gap-2">
             <Save size={16} /> {saving ? "Salvando..." : "Salvar no histórico"}
           </Button>
         )}
         {!shared && (
-          <Button onClick={handleShare} disabled={sharing} variant="outline" className="flex-1 rounded-full font-bold gap-2">
+          <Button onClick={handleShare} disabled={sharing} variant="outline" className="w-full rounded-full font-bold gap-2">
             <Share2 size={16} /> {sharing ? "Compartilhando..." : "Compartilhar roteiro"}
           </Button>
         )}
@@ -663,7 +591,7 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
             ✅ {shared ? "Compartilhado na comunidade e salvo no histórico" : "Salvo no histórico"}
           </p>
         )}
-        <Button variant="outline" size="lg" onClick={onRestart} className="flex-1 rounded-full gap-2">
+        <Button variant="outline" size="lg" onClick={onRestart} className="w-full rounded-full gap-2">
           <RotateCcw size={16} /> Nova viagem
         </Button>
       </div>

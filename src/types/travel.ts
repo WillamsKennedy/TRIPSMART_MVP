@@ -23,6 +23,7 @@ export interface AccommodationDetail {
   lat: number;
   lng: number;
   type: string;
+  bookingUrl?: string;
 }
 
 export interface RestaurantDetail {
