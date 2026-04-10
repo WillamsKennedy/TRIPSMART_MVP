@@ -5,25 +5,100 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
 import {
-  MapPin, Sun, Compass, Star, ArrowRight, LogOut, History,
-  Search, Filter, Users, Navigation, ChevronUp, Palmtree, Utensils, Waves, Mountain,
-  User, Sparkles, Shield, Clock, TrendingUp,
+  MapPin,
+  Sun,
+  Compass,
+  Star,
+  ArrowRight,
+  LogOut,
+  History,
+  Search,
+  Filter,
+  Users,
+  Navigation,
+  ChevronUp,
+  Palmtree,
+  Utensils,
+  Waves,
+  Mountain,
+  User,
+  Sparkles,
+  Shield,
+  Clock,
+  TrendingUp,
 } from "lucide-react";
 import { pernambucoCities, spotsByCity, categoryLabels } from "@/data/mockData";
 
 const featuredDestinations = [
-  { name: "Recife", cityId: "recife", image: "🏙️", tag: "Capital", color: "bg-pe-blue", desc: "Marco Zero, Brennand e praias urbanas" },
-  { name: "Fernando de Noronha", cityId: "noronha", image: "🐢", tag: "Paraíso", color: "bg-pe-red", desc: "As praias mais bonitas do Brasil" },
-  { name: "Porto de Galinhas", cityId: "porto-galinhas", image: "🏖️", tag: "Praias", color: "bg-pe-gold", desc: "Piscinas naturais e jangadas" },
-  { name: "Olinda", cityId: "olinda", image: "🎭", tag: "Cultura", color: "bg-pe-navy", desc: "Ladeiras históricas e carnaval" },
-  { name: "Caruaru", cityId: "caruaru", image: "🎶", tag: "Forró", color: "bg-pe-red", desc: "Feira, São João e Alto do Moura" },
-  { name: "Gravatá", cityId: "gravata", image: "🌄", tag: "Aventura", color: "bg-pe-blue", desc: "Trilhas e rapel na serra" },
+  {
+    name: "Recife",
+    cityId: "recife",
+    image: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/00/2e/31/recife.jpg?w=600&h=400&s=1",
+    tag: "Capital",
+    color: "bg-pe-blue",
+    desc: "Marco Zero, Brennand e praias urbanas",
+  },
+  {
+    name: "Fernando de Noronha",
+    cityId: "noronha",
+    image: "🐢",
+    tag: "Paraíso",
+    color: "bg-pe-red",
+    desc: "As praias mais bonitas do Brasil",
+  },
+  {
+    name: "Porto de Galinhas",
+    cityId: "porto-galinhas",
+    image: "🏖️",
+    tag: "Praias",
+    color: "bg-pe-gold",
+    desc: "Piscinas naturais e jangadas",
+  },
+  {
+    name: "Olinda",
+    cityId: "olinda",
+    image: "🎭",
+    tag: "Cultura",
+    color: "bg-pe-navy",
+    desc: "Ladeiras históricas e carnaval",
+  },
+  {
+    name: "Caruaru",
+    cityId: "caruaru",
+    image: "🎶",
+    tag: "Forró",
+    color: "bg-pe-red",
+    desc: "Feira, São João e Alto do Moura",
+  },
+  {
+    name: "Gravatá",
+    cityId: "gravata",
+    image: "🌄",
+    tag: "Aventura",
+    color: "bg-pe-blue",
+    desc: "Trilhas e rapel na serra",
+  },
 ];
 
 const travelTips = [
-  { icon: Sun, title: "Melhor época", desc: "De setembro a março para praias. Junho para o São João de Caruaru.", accent: "bg-pe-gold text-pe-navy" },
-  { icon: Star, title: "Noronha", desc: "Reserve com antecedência. Limite de visitantes e taxa de preservação.", accent: "bg-pe-blue text-primary-foreground" },
-  { icon: Compass, title: "Gastronomia", desc: "Experimente tapioca, bolo de rolo e caldinho nas praias.", accent: "bg-pe-red text-accent-foreground" },
+  {
+    icon: Sun,
+    title: "Melhor época",
+    desc: "De setembro a março para praias. Junho para o São João de Caruaru.",
+    accent: "bg-pe-gold text-pe-navy",
+  },
+  {
+    icon: Star,
+    title: "Noronha",
+    desc: "Reserve com antecedência. Limite de visitantes e taxa de preservação.",
+    accent: "bg-pe-blue text-primary-foreground",
+  },
+  {
+    icon: Compass,
+    title: "Gastronomia",
+    desc: "Experimente tapioca, bolo de rolo e caldinho nas praias.",
+    accent: "bg-pe-red text-accent-foreground",
+  },
 ];
 
 const Landing = () => {
@@ -36,8 +111,8 @@ const Landing = () => {
 
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 600);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -48,7 +123,10 @@ const Landing = () => {
   }, []);
 
   const goToPlanner = (cityId?: string) => {
-    if (!user) { navigate("/auth"); return; }
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
     navigate(cityId ? `/planejar?city=${cityId}` : "/planejar");
   };
 
@@ -70,7 +148,13 @@ const Landing = () => {
       {/* Nav — Navy bar */}
       <nav className="sticky top-0 z-50 bg-pe-navy border-b border-pe-blue/20">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <button onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); navigate('/'); }} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
+          <button
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              navigate("/");
+            }}
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+          >
             <div className="w-10 h-10 rounded-xl bg-pe-gold flex items-center justify-center">
               <Navigation size={20} className="text-pe-navy" />
             </div>
@@ -82,24 +166,50 @@ const Landing = () => {
             <ThemeToggle />
             {user ? (
               <>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/historico")} className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/historico")}
+                  className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10"
+                >
                   <History size={14} /> Histórico
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/comunidade")} className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/comunidade")}
+                  className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10"
+                >
                   <Users size={14} /> Comunidade
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/perfil")} className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate("/perfil")}
+                  className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10"
+                >
                   <User size={14} /> Perfil
                 </Button>
-                <Button variant="ghost" size="sm" onClick={signOut} className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={signOut}
+                  className="gap-1.5 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10"
+                >
                   <LogOut size={14} /> Sair
                 </Button>
-                <Button onClick={() => goToPlanner()} className="bg-pe-gold hover:bg-pe-gold/90 text-pe-navy border-0 rounded-full px-5 h-9 text-sm font-bold gap-1.5">
+                <Button
+                  onClick={() => goToPlanner()}
+                  className="bg-pe-gold hover:bg-pe-gold/90 text-pe-navy border-0 rounded-full px-5 h-9 text-sm font-bold gap-1.5"
+                >
                   <Compass size={14} /> Planejar
                 </Button>
               </>
             ) : (
-              <Button onClick={() => navigate("/auth")} className="bg-pe-gold hover:bg-pe-gold/90 text-pe-navy border-0 rounded-full px-6 font-bold gap-2">
+              <Button
+                onClick={() => navigate("/auth")}
+                className="bg-pe-gold hover:bg-pe-gold/90 text-pe-navy border-0 rounded-full px-6 font-bold gap-2"
+              >
                 Entrar <ArrowRight size={16} />
               </Button>
             )}
@@ -112,7 +222,11 @@ const Landing = () => {
         <div className="bg-pe-gold/90 px-4 md:px-6 py-3">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <p className="text-pe-navy font-bold text-sm">📋 Você tem um planejamento em andamento</p>
-            <Button onClick={() => navigate('/planejar')} size="sm" className="bg-pe-navy text-white hover:bg-pe-navy/90 rounded-full text-xs font-bold gap-1.5">
+            <Button
+              onClick={() => navigate("/planejar")}
+              size="sm"
+              className="bg-pe-navy text-white hover:bg-pe-navy/90 rounded-full text-xs font-bold gap-1.5"
+            >
               <Compass size={14} /> Continuar planejamento
             </Button>
           </div>
@@ -136,11 +250,13 @@ const Landing = () => {
               ✨ Explore Pernambuco com IA
             </span>
             <h1 className="text-5xl md:text-7xl font-black tracking-display text-white leading-[1.05]">
-              Planeje sua<br />viagem{" "}
-              <span className="text-pe-gold">inteligente</span>
+              Planeje sua
+              <br />
+              viagem <span className="text-pe-gold">inteligente</span>
             </h1>
             <p className="text-lg md:text-xl text-white/75 mt-6 max-w-xl leading-relaxed">
-              Roteiros personalizados com IA para cidades pernambucanas. Pontos turísticos, trilhas, praias, hospedagem e rotas — tudo em um só lugar.
+              Roteiros personalizados com IA para cidades pernambucanas. Pontos turísticos, trilhas, praias, hospedagem
+              e rotas — tudo em um só lugar.
             </p>
             <div className="flex flex-wrap gap-4 mt-10">
               <Button
@@ -150,7 +266,7 @@ const Landing = () => {
                 <Compass size={22} /> Começar a planejar
               </Button>
               <Button
-                onClick={() => document.getElementById('destinos')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => document.getElementById("destinos")?.scrollIntoView({ behavior: "smooth" })}
                 className="bg-pe-blue hover:bg-pe-blue/90 text-white border-0 rounded-full px-8 h-14 text-lg font-bold gap-2 shadow-lg"
               >
                 Ver destinos
@@ -234,9 +350,17 @@ const Landing = () => {
                   {dest.image}
                 </div>
                 <div className="p-5">
-                  <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${
-                    dest.color === "bg-pe-red" ? "text-accent" : dest.color === "bg-pe-gold" ? "text-pe-gold" : "text-primary"
-                  }`}>{dest.tag}</span>
+                  <span
+                    className={`text-[10px] font-black uppercase tracking-[0.2em] ${
+                      dest.color === "bg-pe-red"
+                        ? "text-accent"
+                        : dest.color === "bg-pe-gold"
+                          ? "text-pe-gold"
+                          : "text-primary"
+                    }`}
+                  >
+                    {dest.tag}
+                  </span>
                   <h3 className="text-xl font-bold text-card-foreground mt-1">{dest.name}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{dest.desc}</p>
                 </div>
@@ -256,31 +380,62 @@ const Landing = () => {
             <div className="w-10 h-10 rounded-lg bg-pe-red flex items-center justify-center">
               <Star size={20} className="text-white" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-black tracking-display text-foreground">Atividades em Pernambuco</h2>
+            <h2 className="text-3xl md:text-4xl font-black tracking-display text-foreground">
+              Atividades em Pernambuco
+            </h2>
           </div>
           <p className="text-muted-foreground mb-8 ml-[52px]">Descubra o que fazer em cada cidade</p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-8">
             <div className="flex items-center gap-2 px-4 py-3 bg-card rounded-2xl border border-border flex-1 max-w-md">
               <Search size={18} className="text-muted-foreground" />
-              <input type="text" placeholder="Buscar atividade..." value={searchSpot} onChange={(e) => setSearchSpot(e.target.value)} className="bg-transparent outline-none text-sm text-foreground w-full placeholder:text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Buscar atividade..."
+                value={searchSpot}
+                onChange={(e) => setSearchSpot(e.target.value)}
+                className="bg-transparent outline-none text-sm text-foreground w-full placeholder:text-muted-foreground"
+              />
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <Filter size={16} className="text-muted-foreground" />
-              <button onClick={() => setCityFilter("")} className={`text-xs font-bold px-3 py-2 rounded-full transition-all ${!cityFilter ? "bg-pe-red text-white" : "bg-card border border-border text-muted-foreground hover:border-pe-red/40"}`}>Todas</button>
+              <button
+                onClick={() => setCityFilter("")}
+                className={`text-xs font-bold px-3 py-2 rounded-full transition-all ${!cityFilter ? "bg-pe-red text-white" : "bg-card border border-border text-muted-foreground hover:border-pe-red/40"}`}
+              >
+                Todas
+              </button>
               {pernambucoCities.map((c) => (
-                <button key={c.id} onClick={() => setCityFilter(c.id === cityFilter ? "" : c.id)} className={`text-xs font-bold px-3 py-2 rounded-full transition-all ${cityFilter === c.id ? "bg-pe-red text-white" : "bg-card border border-border text-muted-foreground hover:border-pe-red/40"}`}>{c.name}</button>
+                <button
+                  key={c.id}
+                  onClick={() => setCityFilter(c.id === cityFilter ? "" : c.id)}
+                  className={`text-xs font-bold px-3 py-2 rounded-full transition-all ${cityFilter === c.id ? "bg-pe-red text-white" : "bg-card border border-border text-muted-foreground hover:border-pe-red/40"}`}
+                >
+                  {c.name}
+                </button>
               ))}
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {allSpots.slice(0, 16).map(({ spot, cityId, cityName }, i) => (
-              <motion.button key={`${cityId}-${spot.id}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04, duration: 0.4 }} whileHover={{ y: -4 }} whileTap={{ scale: 0.98 }} onClick={() => navigate(`/atividade/${cityId}/${spot.id}`)} className="rounded-2xl border border-border bg-card text-left overflow-hidden hover:border-pe-red/40 transition-all" style={{ boxShadow: "var(--card-shadow)" }}>
+              <motion.button
+                key={`${cityId}-${spot.id}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04, duration: 0.4 }}
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate(`/atividade/${cityId}/${spot.id}`)}
+                className="rounded-2xl border border-border bg-card text-left overflow-hidden hover:border-pe-red/40 transition-all"
+                style={{ boxShadow: "var(--card-shadow)" }}
+              >
                 {spot.imageUrl ? (
                   <img src={spot.imageUrl} alt={spot.name} className="w-full h-40 object-cover" />
                 ) : (
-                  <div className="w-full h-40 bg-section-blue flex items-center justify-center text-5xl">{spot.imageEmoji}</div>
+                  <div className="w-full h-40 bg-section-blue flex items-center justify-center text-5xl">
+                    {spot.imageEmoji}
+                  </div>
                 )}
                 <div className="p-4">
                   <div className="flex items-center justify-between">
@@ -292,14 +447,28 @@ const Landing = () => {
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">{cityName}</p>
                   <div className="flex items-center justify-between mt-2.5">
-                    <span className="text-xs font-semibold text-pe-red">{spot.avgCostPerPerson === 0 ? "Gratuito" : spot.avgCostPerPerson ? `~R$ ${spot.avgCostPerPerson}/pessoa` : ""}</span>
-                    {spot.category && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pe-blue/10 text-primary">{categoryLabels[spot.category]}</span>}
+                    <span className="text-xs font-semibold text-pe-red">
+                      {spot.avgCostPerPerson === 0
+                        ? "Gratuito"
+                        : spot.avgCostPerPerson
+                          ? `~R$ ${spot.avgCostPerPerson}/pessoa`
+                          : ""}
+                    </span>
+                    {spot.category && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-pe-blue/10 text-primary">
+                        {categoryLabels[spot.category]}
+                      </span>
+                    )}
                   </div>
                 </div>
               </motion.button>
             ))}
           </div>
-          {allSpots.length > 16 && <p className="text-center text-sm text-muted-foreground mt-6">Mostrando 16 de {allSpots.length} atividades · Use os filtros acima</p>}
+          {allSpots.length > 16 && (
+            <p className="text-center text-sm text-muted-foreground mt-6">
+              Mostrando 16 de {allSpots.length} atividades · Use os filtros acima
+            </p>
+          )}
         </div>
       </section>
 
@@ -308,15 +477,33 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-black tracking-display text-foreground">
-              Por que usar o <span className="text-primary">TRIP</span><span className="text-pe-gold">SMART</span>?
+              Por que usar o <span className="text-primary">TRIP</span>
+              <span className="text-pe-gold">SMART</span>?
             </h2>
-            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">Tecnologia e inteligência artificial para transformar seu planejamento.</p>
+            <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+              Tecnologia e inteligência artificial para transformar seu planejamento.
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Sparkles, title: "Roteiros com IA", desc: "A inteligência artificial cria roteiros personalizados hora a hora, considerando seu orçamento, dias e preferências.", color: "bg-pe-blue" },
-              { icon: Shield, title: "Segurança", desc: "Indicadores de segurança por bairro e hospedagem para você viajar com tranquilidade.", color: "bg-pe-red" },
-              { icon: TrendingUp, title: "Comunidade ativa", desc: "Compartilhe roteiros, avalie experiências e descubra dicas de outros viajantes.", color: "bg-pe-gold" },
+              {
+                icon: Sparkles,
+                title: "Roteiros com IA",
+                desc: "A inteligência artificial cria roteiros personalizados hora a hora, considerando seu orçamento, dias e preferências.",
+                color: "bg-pe-blue",
+              },
+              {
+                icon: Shield,
+                title: "Segurança",
+                desc: "Indicadores de segurança por bairro e hospedagem para você viajar com tranquilidade.",
+                color: "bg-pe-red",
+              },
+              {
+                icon: TrendingUp,
+                title: "Comunidade ativa",
+                desc: "Compartilhe roteiros, avalie experiências e descubra dicas de outros viajantes.",
+                color: "bg-pe-gold",
+              },
             ].map((item, i) => (
               <motion.div
                 key={item.title}
@@ -324,7 +511,7 @@ const Landing = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 className="p-8 rounded-2xl border border-border bg-card"
-                style={{ boxShadow: 'var(--card-shadow)' }}
+                style={{ boxShadow: "var(--card-shadow)" }}
               >
                 <div className={`w-14 h-14 rounded-2xl ${item.color} flex items-center justify-center mb-5`}>
                   <item.icon size={26} className="text-white" />
@@ -350,7 +537,14 @@ const Landing = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {travelTips.map((tip, i) => (
-              <motion.div key={tip.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1, duration: 0.5 }} className="p-8 rounded-2xl border border-border bg-card" style={{ boxShadow: "var(--card-shadow)" }}>
+              <motion.div
+                key={tip.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1, duration: 0.5 }}
+                className="p-8 rounded-2xl border border-border bg-card"
+                style={{ boxShadow: "var(--card-shadow)" }}
+              >
                 <div className={`w-12 h-12 rounded-xl ${tip.accent} flex items-center justify-center mb-4`}>
                   <tip.icon size={22} />
                 </div>
@@ -370,10 +564,34 @@ const Landing = () => {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {[
-              { step: "01", title: "Defina seu orçamento", desc: "Escolha quanto quer gastar e quantos viajantes irão.", color: "bg-pe-blue", textColor: "text-white" },
-              { step: "02", title: "Escolha o destino", desc: "Selecione a cidade e as atividades que mais te interessam.", color: "bg-pe-red", textColor: "text-white" },
-              { step: "03", title: "Monte o roteiro", desc: "Hospedagem, transporte e pontos turísticos sob medida.", color: "bg-pe-gold", textColor: "text-pe-navy" },
-              { step: "04", title: "Compartilhe", desc: "Salve no histórico e compartilhe com a comunidade.", color: "bg-pe-navy", textColor: "text-white" },
+              {
+                step: "01",
+                title: "Defina seu orçamento",
+                desc: "Escolha quanto quer gastar e quantos viajantes irão.",
+                color: "bg-pe-blue",
+                textColor: "text-white",
+              },
+              {
+                step: "02",
+                title: "Escolha o destino",
+                desc: "Selecione a cidade e as atividades que mais te interessam.",
+                color: "bg-pe-red",
+                textColor: "text-white",
+              },
+              {
+                step: "03",
+                title: "Monte o roteiro",
+                desc: "Hospedagem, transporte e pontos turísticos sob medida.",
+                color: "bg-pe-gold",
+                textColor: "text-pe-navy",
+              },
+              {
+                step: "04",
+                title: "Compartilhe",
+                desc: "Salve no histórico e compartilhe com a comunidade.",
+                color: "bg-pe-navy",
+                textColor: "text-white",
+              },
             ].map((item, i) => (
               <motion.div
                 key={item.step}
@@ -399,10 +617,15 @@ const Landing = () => {
         <section className="py-24 px-6 bg-pe-navy">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl md:text-5xl font-black text-white tracking-display leading-tight">
-              Pronto para explorar<br /><span className="text-pe-gold">Pernambuco?</span>
+              Pronto para explorar
+              <br />
+              <span className="text-pe-gold">Pernambuco?</span>
             </h2>
             <p className="text-white/60 mt-5 text-lg">Crie sua conta e comece a planejar a viagem dos seus sonhos.</p>
-            <Button onClick={() => navigate("/auth")} className="mt-10 bg-pe-gold hover:bg-pe-gold/90 text-pe-navy rounded-full px-10 h-14 text-lg font-bold gap-2 border-0">
+            <Button
+              onClick={() => navigate("/auth")}
+              className="mt-10 bg-pe-gold hover:bg-pe-gold/90 text-pe-navy rounded-full px-10 h-14 text-lg font-bold gap-2 border-0"
+            >
               Começar agora <ArrowRight size={20} />
             </Button>
           </div>
@@ -411,7 +634,13 @@ const Landing = () => {
 
       {/* Footer — Navy */}
       <footer className="bg-pe-navy text-center py-10 px-6 space-y-3">
-        <button onClick={() => { window.scrollTo({ top: 0, behavior: 'smooth' }); navigate('/'); }} className="font-black text-xl hover:opacity-80 transition-opacity text-white">
+        <button
+          onClick={() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            navigate("/");
+          }}
+          className="font-black text-xl hover:opacity-80 transition-opacity text-white"
+        >
           TRIP<span className="text-pe-gold">SMART</span>
         </button>
         <p className="text-white/50 text-sm">Explore Pernambuco com inteligência 🏖️</p>
@@ -425,7 +654,7 @@ const Landing = () => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
             className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-pe-red flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity"
           >
             <ChevronUp size={24} className="text-white" />
