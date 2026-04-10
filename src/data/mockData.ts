@@ -11,6 +11,10 @@ export const pernambucoImages: Record<string, string> = {
     "https://conhecer-wp.s3.amazonaws.com/novo/wp-content/uploads/2022/12/24150942/roteiro-gravata-forma-conhecer-1.jpg",
   petrolina: "https://blog.blablacar.com.br/wp-content/uploads/2024/05/petrolina-ilha-do-fogo.webp",
   garanhuns: "https://www.voltologo.net/wp-content/uploads/2024/01/garanhuns-pernambuco-dicas.jpg",
+  goiana: "https://www.viagensecaminhos.com/wp-content/uploads/2025/01/goiana-praia-carne-de-vaca.jpg",
+  caboSantoAgostinho: "https://www.viagensecaminhos.com/wp-content/uploads/2024/12/praias-cabo-santo-agostinho.jpg",
+  tamandare: "https://images.trvl-media.com/place/6359515/897435a4-f40a-4543-bd0f-3676beb6b8bc.jpg",
+  serraTalhada: "https://urbay.com.br/i/960/600/cidades/serra-talhada-PE-2562.jpg",
 };
 
 export const pernambucoCities: CityData[] = [
@@ -93,6 +97,7 @@ export const pernambucoCities: CityData[] = [
     imageEmoji: "🤠",
     lat: -7.9861,
     lng: -38.2956,
+    imageUr1: pernambucoImages.serraTalhada,
   },
   {
     id: "goiana",
@@ -101,6 +106,7 @@ export const pernambucoCities: CityData[] = [
     imageEmoji: "⛪",
     lat: -7.5603,
     lng: -35.0025,
+    imageUr1: pernambucoImages.goiana,
   },
   {
     id: "cabo-santo-agostinho",
@@ -109,6 +115,7 @@ export const pernambucoCities: CityData[] = [
     imageEmoji: "🌊",
     lat: -8.2833,
     lng: -35.03,
+    imageUr1: pernambucoImages.caboSantoAgostinho,
   },
   {
     id: "tamandare",
@@ -117,6 +124,7 @@ export const pernambucoCities: CityData[] = [
     imageEmoji: "🏝️",
     lat: -8.7588,
     lng: -35.1042,
+    imageUr1: pernambucoImages.tamandare,
   },
 ];
 
