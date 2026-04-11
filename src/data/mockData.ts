@@ -154,6 +154,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🏖️",
       avgCostPerPerson: 0,
       category: "praia",
+      imageUrl: "https://www.viajali.com.br/wp-content/uploads/2020/04/praia-de-boa-viagem-0.jpg",
     },
     {
       id: "instituto-brennand",
@@ -166,7 +167,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🏰",
       avgCostPerPerson: 30,
       category: "cultura",
-      imageUrl: "https://images.unsplash.com/photo-1580923368248-877f237696cd?w=400",
+      imageUrl: "https://cdn.folhape.com.br/img/pc/1100/1/dn_arquivo/2020/09/foto-paloma-amorim-1.jpg",
     },
     {
       id: "oficina-ceramica-brennand",
@@ -179,6 +180,8 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🎨",
       avgCostPerPerson: 30,
       category: "cultura",
+      imageUrl:
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/05/c7/c6/ad/oficina-ceramica-francisco.jpg?w=1200&h=-1&s=1",
     },
     {
       id: "parque-jaqueira",
@@ -191,6 +194,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🌳",
       avgCostPerPerson: 0,
       category: "natureza",
+      imageUrl: "https://vermelho.org.br/wp-content/uploads/2019/10/parque_da_jaqueira78289.jpg",
     },
     {
       id: "paintball-recife",
@@ -203,6 +207,8 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🎯",
       avgCostPerPerson: 80,
       category: "entretenimento",
+      imageUrl:
+        "https://play-lh.googleusercontent.com/HaEjI5EnIig8-Jm-cBkxZuDn-IEIwgHX_eglmr97-S4H530BIQ3XXiPeB0hf4ZqyT-4=w526-h296-rw",
     },
     {
       id: "passeio-catamara",
@@ -215,6 +221,8 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "⛵",
       avgCostPerPerson: 60,
       category: "turismo",
+      imageUrl:
+        "https://www2.recife.pe.gov.br/sites/default/files/styles/imagem_slide_home/public/_passeio_de_catamaram.jpg?itok=RKT2sGvm",
     },
     {
       id: "rua-bom-jesus",
@@ -227,6 +235,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🕍",
       avgCostPerPerson: 0,
       category: "cultura",
+      imageUrl: "https://turismoemfoco.com.br/v1/wp-content/uploads/2020/07/16633544908_add49ee002_k.jpg",
     },
   ],
   olinda: [
@@ -241,7 +250,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "⛪",
       avgCostPerPerson: 0,
       category: "turismo",
-      imageUrl: "https://images.unsplash.com/photo-1624638331590-e7e4e5e10024?w=400",
+      imageUrl: "https://www.viagensecaminhos.com/wp-content/uploads/2014/06/alto-da-se-olinda.jpg",
     },
     {
       id: "carnaval-olinda",
@@ -254,6 +263,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🎭",
       avgCostPerPerson: 0,
       category: "cultura",
+      imageUrl: "https://cdn.folhape.com.br/img/pc/1100/1/dn_arquivo/2018/02/b9170fb2-a1a3-43dd-bd41-c625e6482316.jpg",
     },
     {
       id: "quatro-cantos",
@@ -266,6 +276,8 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🏘️",
       avgCostPerPerson: 0,
       category: "cultura",
+      imageUrl:
+        "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/07/36/6f/c4/quatro-cantos.jpg?w=1200&h=1200&s=1",
     },
     {
       id: "mercado-ribeira",
@@ -278,6 +290,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🛍️",
       avgCostPerPerson: 0,
       category: "cultura",
+      imageUrl: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/09/44/33/8d/photo1jpg.jpg?w=900&h=500&s=1",
     },
     {
       id: "trilha-olinda",
@@ -290,6 +303,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🥾",
       avgCostPerPerson: 15,
       category: "trilha",
+      imageUrl: "https://www.olinda.pe.gov.br/wp-content/uploads/2025/11/ambiental_olinda1-1024x771.jpeg",
     },
   ],
   noronha: [
@@ -304,7 +318,8 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🏖️",
       avgCostPerPerson: 0,
       category: "praia",
-      imageUrl: "https://images.unsplash.com/photo-1580060195710-6ea6d306aa36?w=400",
+      imageUrl:
+        "https://viagemeturismo.abril.com.br/wp-content/uploads/2016/10/baia-do-sancho-foto-felipe-goifman.jpeg?quality=70&strip=info&w=756&w=636",
     },
     {
       id: "baia-porcos",
@@ -317,6 +332,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🌊",
       avgCostPerPerson: 0,
       category: "praia",
+      imageUrl: "https://blog.atalaianoronha.com.br/assets/uploads/2019/05/istock-1302338129-1024x683.jpg",
     },
     {
       id: "mergulho-noronha",
@@ -329,6 +345,8 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🤿",
       avgCostPerPerson: 350,
       category: "entretenimento",
+      imageUrl:
+        "https://cdn.paytour.com.br/assets/images/passeios-2500197/92653049adcffa00a25f607f21614c23/Galeria---Mergulho.png",
     },
     {
       id: "trilha-atalaia",
