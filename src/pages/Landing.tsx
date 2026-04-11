@@ -273,17 +273,6 @@ const Landing = () => {
               </Button>
             </div>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex-shrink-0 grid grid-cols-2 gap-3"
-          >
-            {["🏖️", "🐢", "🎭", "🌊"].map((emoji, i) => (
-
-            ))}
-          </motion.div>
         </div>
       </section>
 
