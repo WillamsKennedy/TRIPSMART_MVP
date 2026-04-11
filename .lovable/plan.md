@@ -1,41 +1,31 @@
 
 
-## Plano: Mobile, roteiro automático, avaliações no histórico, estado do planner e hotéis com link/avaliações
+## Plano: Imagem no hero, imagens nos destinos e StepBudget compacto
 
-### 1. Ajustes mobile
+### 1. Imagem de fundo de Pernambuco no hero azul
 
-- **Planner.tsx**: Navbar mais compacta em mobile (padding menor, logo menor). BudgetBar visível em mobile (atualmente `hidden sm:block`).
-- **StepSummary.tsx**: Cards de custo em coluna única em mobile (`grid-cols-1` em vez de `grid-cols-2`). Botões de ação empilhados. Timeline com padding reduzido. Textos menores em mobile.
-- **StepAccommodation.tsx**: Cards de hospedagem com layout empilhado (preço abaixo do nome em mobile).
-- **TravelHistory.tsx**: Grid `grid-cols-1` em mobile (já está OK). Sheet full-width em mobile.
+- **Landing.tsx**: Na seção hero (`bg-pe-blue`), adicionar uma imagem de fundo de Pernambuco (ex: Marco Zero ou vista aérea de Recife) com `object-cover` e overlay escuro semi-transparente para manter legibilidade do texto.
+- Substituir os blocos decorativos de formas (`bg-pe-red/10`, `bg-pe-gold/10`) pela imagem.
 
-### 2. Gerar roteiro automaticamente ao chegar no summary
+### 2. Imagens reais nos cards de destinos em destaque
 
-- **StepSummary.tsx**: Adicionar `useEffect` que chama `generateItinerary()` automaticamente ao montar o componente, removendo o botão "Gerar roteiro com IA" e o bloco de fallback. Exibir um skeleton/loading enquanto carrega.
+- **Landing.tsx**: No array `featuredDestinations`, adicionar campo `imageUrl` usando as URLs já existentes em `pernambucoImages` do `mockData.ts`.
+- Na renderização dos cards, substituir o bloco de emoji (`text-7xl`) por uma `<img>` com `object-cover` ocupando a mesma área (`h-40 md:h-48`). Manter o emoji como fallback caso a imagem falhe.
 
-### 3. Avaliação no histórico
+### 3. StepBudget caber na tela sem scroll
 
-- **TravelHistory.tsx**: No Sheet de detalhes, adicionar seção de avaliação para cada ponto turístico e hospedagem (usando `StarRating`). Buscar avaliações existentes do usuário ao abrir o detalhe. Permitir salvar/atualizar avaliações.
-
-### 4. Persistir estado do planner e opção "continuar de onde parou"
-
-- **Planner.tsx**: Salvar `data` e `step` no `sessionStorage` a cada mudança. Ao clicar no logo/voltar para home, navegar normalmente.
-- **Landing.tsx / Index**: Ao detectar estado salvo no sessionStorage, mostrar um banner/botão "Continuar planejamento" que redireciona para `/planejar` restaurando o estado.
-- **Planner.tsx**: No `useEffect` inicial, verificar sessionStorage e restaurar `data`/`step` se existir. Limpar sessionStorage ao completar (salvar/compartilhar) ou ao clicar "Nova viagem".
-
-### 5. Hotéis com link de reserva e avaliações de hóspedes
-
-- **StepAccommodation.tsx**: Adicionar campo `bookingUrl` ao card de hospedagem. Se o n8n retornar `bookingUrl`, exibir botão "Reservar" com link externo. As avaliações de hóspedes já estão implementadas (avgRatings). Garantir que apareçam de forma mais proeminente.
-- **Tipo `AccommodationDetail`** em `travel.ts`: Adicionar campo opcional `bookingUrl?: string`.
+- **StepBudget.tsx**: Compactar o layout para caber em ~867px de viewport:
+  - Reduzir o título (`text-3xl` em vez de `text-4xl/5xl`) e gaps (`gap-4` em vez de `gap-10`).
+  - Tornar os cards de orçamento mais compactos (`p-3` em vez de `p-4`, gap menor).
+  - Colocar os contadores (adultos, crianças, quartos, dias) todos numa grid `grid-cols-4` em desktop, compactando o espaço vertical.
+  - Remover o toggle de casal como bloco separado — integrá-lo na mesma linha dos contadores.
+  - Reduzir tamanho dos botões +/- (`w-8 h-8`).
+  - Botão "Continuar" menor (`h-12`).
 
 ### Arquivos a editar
 
-| Arquivo | Mudanças |
+| Arquivo | Mudança |
 |---|---|
-| `src/pages/Planner.tsx` | Persistir estado em sessionStorage, restaurar ao montar |
-| `src/pages/Landing.tsx` | Banner "Continuar planejamento" se houver estado salvo |
-| `src/components/StepSummary.tsx` | Auto-gerar roteiro no mount, ajustes mobile |
-| `src/pages/TravelHistory.tsx` | Seção de avaliação com StarRating no Sheet |
-| `src/components/StepAccommodation.tsx` | Link de reserva, layout mobile |
-| `src/types/travel.ts` | Adicionar `bookingUrl` ao `AccommodationDetail` |
+| `src/pages/Landing.tsx` | Imagem de fundo no hero; imageUrl nos cards de destinos |
+| `src/components/StepBudget.tsx` | Layout compacto para caber na viewport sem scroll |
 
