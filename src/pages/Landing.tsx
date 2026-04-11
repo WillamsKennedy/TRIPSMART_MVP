@@ -281,14 +281,7 @@ const Landing = () => {
             className="flex-shrink-0 grid grid-cols-2 gap-3"
           >
             {["🏖️", "🐢", "🎭", "🌊"].map((emoji, i) => (
-              <div
-                key={i}
-                className={`w-28 h-28 md:w-36 md:h-36 rounded-2xl flex items-center justify-center text-5xl md:text-6xl ${
-                  i === 0 ? "bg-pe-gold/20" : i === 1 ? "bg-pe-red/20" : i === 2 ? "bg-white/10" : "bg-pe-gold/15"
-                }`}
-              >
-                {emoji}
-              </div>
+
             ))}
           </motion.div>
         </div>
