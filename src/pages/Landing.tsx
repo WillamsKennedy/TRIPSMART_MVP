@@ -273,6 +273,16 @@ const Landing = () => {
               </Button>
             </div>
           </motion.div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+            className="flex-shrink-0 grid grid-cols-2 gap-3"
+          >
+            <img src= "https://cdn2.tribunaonline.com.br/img/inline/280000/Pernambuco-registra-crescimento-no-turismo-em-20250028529000202512171110.jpg?xid=1306486">
+              </div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
