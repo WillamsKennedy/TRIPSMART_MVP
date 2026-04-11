@@ -108,6 +108,33 @@ const TravelHistory = () => {
     if (selected?.id === id) setSelected(null);
   };
 
+  const exportToPdf = async () => {
+    if (!detailRef.current || !selected) return;
+    setExportingPdf(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+      const canvas = await html2canvas(detailRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfW = pdf.internal.pageSize.getWidth() - 20;
+      const imgH = (canvas.height * pdfW) / canvas.width;
+      let left = imgH, pos = 10;
+      pdf.addImage(imgData, "JPEG", 10, pos, pdfW, imgH);
+      left -= pdf.internal.pageSize.getHeight() - 20;
+      while (left > 0) {
+        pos = left - imgH + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 10, pos, pdfW, imgH);
+        left -= pdf.internal.pageSize.getHeight() - 20;
+      }
+      pdf.save(`historico-${selected.state.toLowerCase().replace(/\s/g, "-")}.pdf`);
+    } catch (e: any) {
+      console.error("PDF export error:", e);
+    }
+    setExportingPdf(false);
+  };
+
   const groupTypeLabel = (t: string) => t === 'couple' ? 'Casal' : t === 'friends' ? 'Amigos' : 'Solo';
   const getBudgetLabel = (budget: number) => { const range = budgetRanges.find(r => budget >= r.min && budget <= r.max); return range ? `${range.emoji} ${range.label}` : `R$ ${budget.toLocaleString('pt-BR')}`; };
   const getTransportLabel = (id: string | null) => { if (!id) return null; const t = transportOptions.find(o => o.id === id); return t ? `${t.emoji} ${t.label}` : id; };
