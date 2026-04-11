@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,7 +29,7 @@ const TravelHistory = () => {
   const [accommodationRating, setAccommodationRating] = useState(0);
   const [savingReview, setSavingReview] = useState<string | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
-  const detailRef = useState<HTMLDivElement | null>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { if (!user) { navigate('/auth'); return; } fetchHistory(); }, [user]);
 
