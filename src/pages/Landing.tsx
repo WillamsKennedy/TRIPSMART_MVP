@@ -236,9 +236,7 @@ const Landing = () => {
       {/* Hero — Blue background */}
       <section className="relative overflow-hidden bg-pe-blue">
         <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-pe-red/10 rounded-l-[100px]">
-            <img url= "https://cdn2.tribunaonline.com.br/img/inline/280000/Pernambuco-registra-crescimento-no-turismo-em-20250028529000202512171110.jpg?xid=1306486">
-          </div>
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-pe-red/10 rounded-l-[100px]" />
           <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-pe-gold/10 rounded-tr-[80px]" />
         </div>
         <div className="relative max-w-7xl mx-auto px-6 py-24 md:py-36 flex flex-col lg:flex-row items-center gap-12">
