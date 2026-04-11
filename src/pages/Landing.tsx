@@ -27,57 +27,16 @@ import {
   Clock,
   TrendingUp,
 } from "lucide-react";
-import { pernambucoCities, spotsByCity, categoryLabels } from "@/data/mockData";
+import { pernambucoCities, spotsByCity, categoryLabels, pernambucoImages } from "@/data/mockData";
+import heroPernambuco from "@/assets/hero-pernambuco.jpg";
 
 const featuredDestinations = [
-  {
-    name: "Recife",
-    cityId: "recife",
-    image: "🏙️",
-    tag: "Capital",
-    color: "bg-pe-blue",
-    desc: "Marco Zero, Brennand e praias urbanas",
-  },
-  {
-    name: "Fernando de Noronha",
-    cityId: "noronha",
-    image: "🐢",
-    tag: "Paraíso",
-    color: "bg-pe-red",
-    desc: "As praias mais bonitas do Brasil",
-  },
-  {
-    name: "Porto de Galinhas",
-    cityId: "porto-galinhas",
-    image: "🏖️",
-    tag: "Praias",
-    color: "bg-pe-gold",
-    desc: "Piscinas naturais e jangadas",
-  },
-  {
-    name: "Olinda",
-    cityId: "olinda",
-    image: "🎭",
-    tag: "Cultura",
-    color: "bg-pe-navy",
-    desc: "Ladeiras históricas e carnaval",
-  },
-  {
-    name: "Caruaru",
-    cityId: "caruaru",
-    image: "🎶",
-    tag: "Forró",
-    color: "bg-pe-red",
-    desc: "Feira, São João e Alto do Moura",
-  },
-  {
-    name: "Gravatá",
-    cityId: "gravata",
-    image: "🌄",
-    tag: "Aventura",
-    color: "bg-pe-blue",
-    desc: "Trilhas e rapel na serra",
-  },
+  { name: "Recife", cityId: "recife", emoji: "🏙️", imageUrl: pernambucoImages.recife, tag: "Capital", color: "bg-pe-blue", desc: "Marco Zero, Brennand e praias urbanas" },
+  { name: "Fernando de Noronha", cityId: "noronha", emoji: "🐢", imageUrl: pernambucoImages.noronha, tag: "Paraíso", color: "bg-pe-red", desc: "As praias mais bonitas do Brasil" },
+  { name: "Porto de Galinhas", cityId: "porto-galinhas", emoji: "🏖️", imageUrl: pernambucoImages["porto-galinhas"], tag: "Praias", color: "bg-pe-gold", desc: "Piscinas naturais e jangadas" },
+  { name: "Olinda", cityId: "olinda", emoji: "🎭", imageUrl: pernambucoImages.olinda, tag: "Cultura", color: "bg-pe-navy", desc: "Ladeiras históricas e carnaval" },
+  { name: "Caruaru", cityId: "caruaru", emoji: "🎶", imageUrl: pernambucoImages.caruaru, tag: "Forró", color: "bg-pe-red", desc: "Feira, São João e Alto do Moura" },
+  { name: "Gravatá", cityId: "gravata", emoji: "🌄", imageUrl: pernambucoImages.gravata, tag: "Aventura", color: "bg-pe-blue", desc: "Trilhas e rapel na serra" },
 ];
 
 const travelTips = [
@@ -233,12 +192,10 @@ const Landing = () => {
         </div>
       )}
 
-      {/* Hero — Blue background */}
-      <section className="relative overflow-hidden bg-pe-blue">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 right-0 w-1/2 h-full bg-pe-red/10 rounded-l-[100px]" />
-          <div className="absolute bottom-0 left-0 w-1/3 h-1/2 bg-pe-gold/10 rounded-tr-[80px]" />
-        </div>
+      {/* Hero — Background image */}
+      <section className="relative overflow-hidden">
+        <img src={heroPernambuco} alt="Vista aérea de Pernambuco" className="absolute inset-0 w-full h-full object-cover" width={1920} height={800} />
+        <div className="absolute inset-0 bg-pe-navy/60" />
         <div className="relative max-w-7xl mx-auto px-6 py-24 md:py-36 flex flex-col lg:flex-row items-center gap-12">
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -267,28 +224,11 @@ const Landing = () => {
               </Button>
               <Button
                 onClick={() => document.getElementById("destinos")?.scrollIntoView({ behavior: "smooth" })}
-                className="bg-pe-blue hover:bg-pe-blue/90 text-white border-0 rounded-full px-8 h-14 text-lg font-bold gap-2 shadow-lg"
+                className="bg-white/20 hover:bg-white/30 text-white border-0 rounded-full px-8 h-14 text-lg font-bold gap-2 shadow-lg backdrop-blur-sm"
               >
                 Ver destinos
               </Button>
             </div>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            className="flex-shrink-0 grid grid-cols-2 gap-3"
-          >
-            {["🏖️", "🐢", "🎭", "🌊"].map((emoji, i) => (
-              <div
-                key={i}
-                className={`w-28 h-28 md:w-36 md:h-36 rounded-2xl flex items-center justify-center text-5xl md:text-6xl ${
-                  i === 0 ? "bg-pe-gold/20" : i === 1 ? "bg-pe-red/20" : i === 2 ? "bg-white/10" : "bg-pe-gold/15"
-                }`}
-              >
-                {emoji}
-              </div>
-            ))}
           </motion.div>
         </div>
       </section>
@@ -345,9 +285,13 @@ const Landing = () => {
                 className="group relative rounded-2xl overflow-hidden border border-border bg-card cursor-pointer hover:shadow-xl transition-all text-left"
                 style={{ boxShadow: "var(--card-shadow)" }}
               >
-                <div className={`h-40 md:h-48 ${dest.color} flex items-center justify-center text-7xl md:text-8xl`}>
-                  {dest.image}
-                </div>
+                {dest.imageUrl ? (
+                  <img src={dest.imageUrl} alt={dest.name} loading="lazy" className="h-40 md:h-48 w-full object-cover" />
+                ) : (
+                  <div className={`h-40 md:h-48 ${dest.color} flex items-center justify-center text-7xl md:text-8xl`}>
+                    {dest.emoji}
+                  </div>
+                )}
                 <div className="p-5">
                   <span
                     className={`text-[10px] font-black uppercase tracking-[0.2em] ${
