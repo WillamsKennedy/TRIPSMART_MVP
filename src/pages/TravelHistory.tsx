@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { ArrowLeft, Plane, Calendar, Users, MapPin, Trash2, DollarSign, Bus, Hotel, Utensils, Star, Navigation, ChevronRight, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Plane, Calendar, Users, MapPin, Trash2, DollarSign, Bus, Hotel, Utensils, Star, Navigation, ChevronRight, MessageSquare, FileDown } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import StarRating from '@/components/StarRating';
 import { budgetRanges, transportOptions, localTransportOptions, monthNames } from '@/data/mockData';
@@ -28,6 +28,8 @@ const TravelHistory = () => {
   const [activityRatings, setActivityRatings] = useState<Record<string, number>>({});
   const [accommodationRating, setAccommodationRating] = useState(0);
   const [savingReview, setSavingReview] = useState<string | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const detailRef = useState<HTMLDivElement | null>(null);
 
   useEffect(() => { if (!user) { navigate('/auth'); return; } fetchHistory(); }, [user]);
 
