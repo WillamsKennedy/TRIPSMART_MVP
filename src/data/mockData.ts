@@ -141,7 +141,7 @@ export const spotsByCity: Record<string, TouristSpot[]> = {
       imageEmoji: "🏛️",
       avgCostPerPerson: 0,
       category: "cultura",
-      imageUrl: "https://images.unsplash.com/photo-1598443926757-02b7a41d2513?w=400",
+      imageUrl: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/00/2e/31/recife.jpg?w=1200&h=-1&s=1",
     },
     {
       id: "praia-boa-viagem",
