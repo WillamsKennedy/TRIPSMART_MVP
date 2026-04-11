@@ -222,7 +222,7 @@ const TravelHistory = () => {
             </SheetTitle>
           </SheetHeader>
           {selected && (
-            <div className="mt-6 space-y-6">
+            <div ref={detailRef} className="mt-6 space-y-6">
               <div className="p-4 rounded-xl bg-section-blue border border-pe-blue/10 space-y-3">
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Opções selecionadas</h3>
                 <div className="grid grid-cols-2 gap-3">
@@ -338,9 +338,14 @@ const TravelHistory = () => {
                 </div>
               )}
 
-              <p className="text-xs text-muted-foreground text-center pt-4 border-t border-border">
-                Planejado em {new Date(selected.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-              </p>
+              <div className="flex flex-col gap-3 pt-4 border-t border-border">
+                <Button onClick={exportToPdf} disabled={exportingPdf} variant="outline" className="w-full rounded-full font-bold gap-2">
+                  <FileDown size={16} /> {exportingPdf ? "Exportando..." : "Baixar PDF"}
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Planejado em {new Date(selected.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
             </div>
           )}
         </SheetContent>
