@@ -46,8 +46,12 @@ const Planner = () => {
     } catch {}
   }, []);
 
-  // Persist state to sessionStorage
+  // Persist state to sessionStorage (exclude summary step)
   useEffect(() => {
+    if (step === 'summary') {
+      sessionStorage.removeItem(STORAGE_KEY);
+      return;
+    }
     if (step !== 'budget' || data.budget > 0) {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ step, data }));
     }

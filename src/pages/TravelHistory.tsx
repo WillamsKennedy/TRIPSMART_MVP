@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { ArrowLeft, Plane, Calendar, Users, MapPin, Trash2, DollarSign, Bus, Hotel, Utensils, Star, Navigation, ChevronRight, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Plane, Calendar, Users, MapPin, Trash2, DollarSign, Bus, Hotel, Utensils, Star, Navigation, ChevronRight, MessageSquare, FileDown } from 'lucide-react';
 import ThemeToggle from '@/components/ThemeToggle';
 import StarRating from '@/components/StarRating';
 import { budgetRanges, transportOptions, localTransportOptions, monthNames } from '@/data/mockData';
@@ -28,6 +28,8 @@ const TravelHistory = () => {
   const [activityRatings, setActivityRatings] = useState<Record<string, number>>({});
   const [accommodationRating, setAccommodationRating] = useState(0);
   const [savingReview, setSavingReview] = useState<string | null>(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const detailRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { if (!user) { navigate('/auth'); return; } fetchHistory(); }, [user]);
 
@@ -104,6 +106,33 @@ const TravelHistory = () => {
     await supabase.from('travel_history').delete().eq('id', id);
     setRecords((prev) => prev.filter((r) => r.id !== id));
     if (selected?.id === id) setSelected(null);
+  };
+
+  const exportToPdf = async () => {
+    if (!detailRef.current || !selected) return;
+    setExportingPdf(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const { jsPDF } = await import("jspdf");
+      const canvas = await html2canvas(detailRef.current, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pdfW = pdf.internal.pageSize.getWidth() - 20;
+      const imgH = (canvas.height * pdfW) / canvas.width;
+      let left = imgH, pos = 10;
+      pdf.addImage(imgData, "JPEG", 10, pos, pdfW, imgH);
+      left -= pdf.internal.pageSize.getHeight() - 20;
+      while (left > 0) {
+        pos = left - imgH + 10;
+        pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 10, pos, pdfW, imgH);
+        left -= pdf.internal.pageSize.getHeight() - 20;
+      }
+      pdf.save(`historico-${selected.state.toLowerCase().replace(/\s/g, "-")}.pdf`);
+    } catch (e: any) {
+      console.error("PDF export error:", e);
+    }
+    setExportingPdf(false);
   };
 
   const groupTypeLabel = (t: string) => t === 'couple' ? 'Casal' : t === 'friends' ? 'Amigos' : 'Solo';
@@ -193,7 +222,7 @@ const TravelHistory = () => {
             </SheetTitle>
           </SheetHeader>
           {selected && (
-            <div className="mt-6 space-y-6">
+            <div ref={detailRef} className="mt-6 space-y-6">
               <div className="p-4 rounded-xl bg-section-blue border border-pe-blue/10 space-y-3">
                 <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">Opções selecionadas</h3>
                 <div className="grid grid-cols-2 gap-3">
@@ -309,9 +338,14 @@ const TravelHistory = () => {
                 </div>
               )}
 
-              <p className="text-xs text-muted-foreground text-center pt-4 border-t border-border">
-                Planejado em {new Date(selected.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-              </p>
+              <div className="flex flex-col gap-3 pt-4 border-t border-border">
+                <Button onClick={exportToPdf} disabled={exportingPdf} variant="outline" className="w-full rounded-full font-bold gap-2">
+                  <FileDown size={16} /> {exportingPdf ? "Exportando..." : "Baixar PDF"}
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  Planejado em {new Date(selected.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
             </div>
           )}
         </SheetContent>

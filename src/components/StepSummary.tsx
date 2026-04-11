@@ -68,6 +68,13 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
     }
   }, []);
 
+  // Auto-save to history when itinerary is generated
+  useEffect(() => {
+    if (richItinerary && !saved && !saving && user) {
+      handleSave();
+    }
+  }, [richItinerary]);
+
   const saveActivityReview = async (activityName: string) => {
     if (!user) return;
     const score = activityRatings[activityName];
@@ -576,10 +583,8 @@ const StepSummary = ({ data, onRestart }: StepSummaryProps) => {
             <FileDown size={16} /> {exportingPdf ? "Exportando..." : "Exportar PDF"}
           </Button>
         )}
-        {!saved && !shared && (
-          <Button onClick={handleSave} disabled={saving} className="w-full gradient-pe border-0 rounded-full font-bold gap-2">
-            <Save size={16} /> {saving ? "Salvando..." : "Salvar no histórico"}
-          </Button>
+        {saved && !shared && (
+          <p className="text-xs text-center text-muted-foreground">✅ Salvo automaticamente no histórico</p>
         )}
         {!shared && (
           <Button onClick={handleShare} disabled={sharing} variant="outline" className="w-full rounded-full font-bold gap-2">
